@@ -1,9 +1,13 @@
-interface IPerson {
+/*export default */interface IPerson {
     readonly name: string,
     age: number,
     spouse?: string,
     celebrateBirthday: ( inc : number ) => void
 }
+
+// export type {
+//     IPerson
+// }
 
 // 1. data type for an object
 let john : IPerson;
@@ -11,7 +15,7 @@ john = {
     name: 'John',
     age: 32,
     celebrateBirthday( inc : number ) {
-        ++this.age;
+        this.age += inc;
     }
 };
 
@@ -62,4 +66,14 @@ const irobot2 = new Robot();
 const persons = [
     jane,
     irobot2
-]
+];
+
+increaseAges( persons );
+console.log( persons );
+
+// default export is the main export from a module
+// You can have only 1 default export
+export type {
+    IPerson as default,
+    increaseAges
+}
