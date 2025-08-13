@@ -18,7 +18,7 @@ const jane : Person = {
     spouse: 'John'
 }
 
-john.age = 33;
+// john.age = 33; // error - age is readonly
 
 // error -> jane is const
 // jane = {
@@ -27,4 +27,4 @@ john.age = 33;
 // }
 
 jane.name = 'Janette';
-jane.age = 29;
+// jane.age = 29; // error - age is readonly
