@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hello React</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            // const Button = ( props ) => {
+
+            const Button = ( { title, icon } ) => {
+                // console.log( props );
+
+                return (
+                    <button>{ title }</button>
+                );
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            /**
+             * props -> { title: "Watch", icon: "eye" }
+             * props -> { title: "Code", icon: "code" }
+             */
+            root.render(
+                <div>
+                    <Button title="Watch" icon="eye" />
+                    <Button title="Code" icon="code"></Button>
+                </div>
+            );
+        </script>
+    </body>
+</html>
