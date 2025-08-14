@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hello JavaScript XML (JSX)</title>
+    </head>
+    <body>
+        <!-- Plot of land -->
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <!-- Babel (in-browser compiler) for JSX -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            // define the UI - React element
+
+            /*
+            <div id="introduction" class="message">
+                Hello <strong>React</strong>
+            </div>
+            */
+
+            // blueprint for our "house" (React element)
+            const el = <div id="introduction" class="message">
+                Hello <strong>React</strong>
+            </div>
+
+            console.log( el );
+
+            const root = ReactDOM.createRoot( document.getElementById( 'root' ) );
+            root.render( el );
+        </script>
+    </body>
+</html>
