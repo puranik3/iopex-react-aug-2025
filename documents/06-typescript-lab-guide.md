@@ -1131,4 +1131,148 @@ Here, the **return type** depends on `T`, but the runtime check is still done on
 4. Consider **tagged types / discriminated unions** when dealing with multiple object types.
 5. Use **conditional types** only for **compile-time type reasoning**, not runtime logic.
 
+In summary, here is a cheat sheet for handling conditional logic based on actual type in generic types.
+
+---
+
+## TypeScript Generics & Runtime Type Handling Cheat Sheet
+
+---
+
+### 1️⃣ Primitives (`string`, `number`, `boolean`)
+
+**Pattern:** Use `typeof` on the **value**, not the generic type.
+
+```ts
+function processPrimitive<T>(value: T) {
+    if (typeof value === "string") {
+        console.log("String length:", value.length);
+    } else if (typeof value === "number") {
+        console.log("Number squared:", value * value);
+    } else {
+        console.log("Other type");
+    }
+}
+
+processPrimitive("hello"); // String length: 5
+processPrimitive(10);      // Number squared: 100
+```
+
+**Key:** Works only for JS primitives: `"string" | "number" | "boolean" | "symbol" | "bigint"`.
+
+---
+
+### 2️⃣ Classes / Objects
+
+**Pattern:** Use `instanceof` on the **value**, or pass constructor explicitly.
+
+```ts
+class Person { constructor(public name: string) {} }
+class Animal { constructor(public species: string) {} }
+
+function processObject<T>(value: T) {
+    if (value instanceof Person) {
+        console.log("Person:", value.name);
+    } else if (value instanceof Animal) {
+        console.log("Animal:", value.species);
+    }
+}
+
+processObject(new Person("Alice")); // Person: Alice
+processObject(new Animal("Dog"));   // Animal: Dog
+```
+
+**When using a generic constructor (Factory pattern):**
+
+```ts
+function createInstance<T>(ctor: new () => T): T {
+    return new ctor();
+}
+
+const p = createInstance(Person);
+console.log(p.name); // ""
+```
+
+---
+
+### 3️⃣ Interfaces / Structural Types
+
+Interfaces **don’t exist at runtime**, so `instanceof` **cannot** be used.
+
+**Pattern:** Use **discriminant / tag property**.
+
+```ts
+interface Cat { type: "cat"; meow: () => void; }
+interface Dog { type: "dog"; bark: () => void; }
+
+function speak<T extends Cat | Dog>(animal: T) {
+    if (animal.type === "cat") {
+        animal.meow();
+    } else {
+        animal.bark();
+    }
+}
+```
+
+✅ Recommended for generic types where runtime class info is unavailable.
+
+---
+
+### 4️⃣ Conditional / Overloaded Return Types (Compile-time type reasoning)
+
+**Pattern:** Use conditional types for return types, but **runtime checks still need `typeof` / `instanceof`**.
+
+```ts
+function double<T extends number | string>(value: T): T extends number ? number : string {
+    if (typeof value === "number") {
+        return (value * 2) as any;
+    } else {
+        return (value + value) as any;
+    }
+}
+
+const a = double(10);    // number
+const b = double("hi");  // string
+```
+
+* **Benefit:** TypeScript understands the return type (`a: number`, `b: string`)
+* **Runtime:** You still need actual `typeof` checks.
+
+---
+
+### 5️⃣ Runtime Type Guards (Recommended for complex generics)
+
+You can define **type guard functions** for runtime checks:
+
+```ts
+interface Fish { swim: () => void }
+interface Bird { fly: () => void }
+
+function isFish(x: any): x is Fish {
+    return typeof x.swim === "function";
+}
+
+function move<T>(animal: T) {
+    if (isFish(animal)) {
+        animal.swim();
+    } else {
+        (animal as Bird).fly();
+    }
+}
+```
+
+✅ Clean separation of **runtime check** vs **type system**.
+
+---
+
+### 6️⃣ Summary / Best Practices
+
+| Scenario                         | How to Check at Runtime               | Notes                                   |                           |
+| -------------------------------- | ------------------------------------- | --------------------------------------- | ------------------------- |
+| Primitives (`string`, `number`)  | `typeof value`                        | Works directly, generic type erased     |                           |
+| Classes / Objects                | `value instanceof Class`              | Or pass constructor explicitly          |                           |
+| Interfaces / Structural Types    | Tagged property (\`type: "cat"        | "dog"\`)                                | `instanceof` doesn’t work |
+| Generic conditional return types | Use `typeof` or `instanceof` on value | Conditional types only for compile-time |                           |
+| Complex runtime checks           | Type guard functions                  | Clean & reusable                        |                           |
+
 ---
