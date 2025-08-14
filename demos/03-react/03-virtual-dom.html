@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Virtual DOM</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            const el = (
+                <div id="introduction" className="message">
+                    <h1>Introduction</h1>
+                    <strong>React</strong>
+                    is a frontend library to create an app's UI
+                </div>
+            );
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            root.render(el);
+
+            setTimeout(
+                () => { // f
+                    // f executes after 10 seconds
+                    // Will this demolish the UI and recreating it? No. That's good. But why? Because React is good at taking care of DOM updates and it does it efficiently.
+                    // The div, h1 are not recreated by the React Virtual DOM mechanism
+                    root.render(
+                        <div id="Setting up the app" className="message">
+                            <h1>Setting up the React app</h1>
+                            <p>
+                                We shall use <strong>create-react-app</strong> to
+                                set up the React app
+                            </p>
+                        </div>
+                    );
+                },
+                10000 // 10 seconds
+            );
+        </script>
+    </body>
+</html>
