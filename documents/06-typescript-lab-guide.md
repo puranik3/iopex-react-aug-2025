@@ -977,3 +977,158 @@ type FunctionOnlyProps = Pick<Mixed, OnlyFunctions<Mixed>>;
 ```
 
 ---
+
+# Appendix
+
+## Handling logic based on actual type of a generic type at runtime
+If you want to have conditional logic based on a generic type's actual data type you can do so.
+
+### 1️⃣ Generic Types in TypeScript
+
+A generic type in TypeScript looks like:
+
+```ts
+function identity<T>(value: T): T {
+    return value;
+}
+```
+
+The **problem**: TypeScript **erases generic types at runtime**. This means `T` **does not exist** at runtime. You cannot do:
+
+```ts
+function doSomething<T>(value: T) {
+    if (typeof T === "string") { } // ❌ ERROR: T is gone at runtime
+}
+```
+
+---
+
+### 2️⃣ Why `typeof` / `instanceof` usually fail with generics
+
+* `typeof` works on **runtime values**, e.g., `typeof value`.
+* `instanceof` works on **runtime constructors**, e.g., `value instanceof Date`.
+* Generic type parameters `T` are **compile-time only**, so you **cannot directly do `typeof T` or `T instanceof ...`**.
+
+```ts
+function logType<T>(value: T) {
+    console.log(typeof T); // ❌ ERROR: T is erased
+}
+```
+
+**Solution:** inspect the **value itself**, not the type parameter.
+
+---
+
+### 3️⃣ Recommended patterns for type-dependent logic
+
+#### a) Use `typeof` or `instanceof` on the **value**
+
+```ts
+function process<T>(value: T) {
+    if (typeof value === "string") {
+        console.log("String with length", value.length);
+    } else if (typeof value === "number") {
+        console.log("Number squared", value * value);
+    }
+}
+```
+
+✅ Works for primitives.
+
+```ts
+process("hello"); // String with length 5
+process(10);      // Number squared 100
+```
+
+For objects:
+
+```ts
+class Person { constructor(public name: string) {} }
+
+function checkInstance<T>(value: T) {
+    if (value instanceof Person) {
+        console.log(value.name);
+    }
+}
+
+checkInstance(new Person("Alice")); // Alice
+```
+
+---
+
+#### b) Pass a **type or constructor explicitly** (Factory / Type Token Pattern)
+
+Since generics are erased, you can pass the constructor as a parameter:
+
+```ts
+function createInstance<T>(ctor: new () => T): T {
+    return new ctor();
+}
+
+class Car { model = "Tesla"; }
+
+const car = createInstance(Car);
+console.log(car.model); // Tesla
+```
+
+This allows you to do runtime type checks if needed:
+
+```ts
+function isInstanceOf<T>(value: any, ctor: new () => T): value is T {
+    return value instanceof ctor;
+}
+```
+
+---
+
+#### c) Use **tag properties** or discriminated unions
+
+If you control the type, add a runtime property that identifies it:
+
+```ts
+interface Cat { type: "cat"; meow: () => void; }
+interface Dog { type: "dog"; bark: () => void; }
+
+function speak(animal: Cat | Dog) {
+    if (animal.type === "cat") {
+        animal.meow();
+    } else {
+        animal.bark();
+    }
+}
+```
+
+✅ This avoids `instanceof` and works well in generic contexts.
+
+---
+
+#### d) Conditional type-based overloads (TypeScript compile-time only)
+
+Sometimes you want **different behavior in code**, but only at **compile time**, not runtime:
+
+```ts
+function double<T extends number | string>(value: T): T extends number ? number : string {
+    if (typeof value === "number") {
+        return (value * 2) as any;
+    } else {
+        return (value + value) as any;
+    }
+}
+
+const a = double(10);    // number
+const b = double("hi");  // string
+```
+
+Here, the **return type** depends on `T`, but the runtime check is still done on `typeof value`.
+
+---
+
+### ✅ Best Practices
+
+1. **Never try to `typeof T` or `instanceof T` directly** — it does not exist at runtime.
+2. Use **runtime values** for type checks (`typeof value`, `instanceof value`).
+3. If you need a **constructor**, pass it as a parameter (Type Token / Factory pattern).
+4. Consider **tagged types / discriminated unions** when dealing with multiple object types.
+5. Use **conditional types** only for **compile-time type reasoning**, not runtime logic.
+
+---
