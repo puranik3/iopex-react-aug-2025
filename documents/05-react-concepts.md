@@ -1909,129 +1909,248 @@ const toggle = React.useCallback(() => setOpen((s) => !s), [setOpen]);
 
 ## Step 21: Performance optimization: `React.useMemo()` – Optimizing Expensive Computations inside components
 - We see how to use `useMemo()` to optimize performance in React components. We'll walk through a real-world use case where filtering a large dataset can become a performance bottleneck when unrelated state changes occur.
+- Set Up the App without `useMemo` in `15-memoizing-costly-computations-useMemo.html`. Create a large list of todos.
+```html
+<!-- ! + Enter -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <div id="root"></div>
 
-## Step 1: Set Up the App Without `useMemo`
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
 
-### 1.1 Create a large list of todos
+        <script type="text/babel">
+            const getTodos = () => {
+                const todos = [];
 
-```js
-const getTodos = () => {
-  const todos = [];
-  for (let i = 0; i < 200000; ++i) {
-    todos.push({
-      id: i + 1,
-      task: "Task " + (i + 1),
-      done: Math.random() < 0.5,
-    });
-  }
-  return todos;
-};
+                for (let i = 0; i < 200000; ++i) {
+                    todos.push({
+                        id: i + 1,
+                        task: "Task " + (i + 1),
+                        done: Math.random() < 0.5,
+                    });
+                }
 
-const todos = getTodos();
+                return todos;
+            };
+
+            const todos = getTodos();
+
+            const App = () => {
+                const [tab, setTab] = React.useState("all");
+                const [theme, setTheme] = React.useState("white");
+
+                return (
+                    <React.Fragment>
+                        <button onClick={() => setTab("all")}>All</button>
+                        <button onClick={() => setTab("done")}>Done</button>
+                        <button onClick={() => setTab("not done")}>Not done</button>
+
+                        <button onClick={() => setTheme(theme === "white" ? "black" : "white")}>
+                            Toggle theme
+                        </button>
+
+                        <TodosFilter todos={todos} tab={tab} theme={theme} />
+                    </React.Fragment>
+                );
+            };
+
+            const filterTodos = (todos, tab) => {
+                switch (tab) {
+                    case "all":
+                        return todos;
+                    case "done":
+                        return todos.filter((item) => item.done);
+                    case "not done":
+                        return todos.filter((item) => !item.done);
+                }
+            };
+
+            const TodosFilter = ({ todos, tab, theme }) => {
+                const filteredTodos = filterTodos(todos, tab);
+
+                return (
+                    <div
+                        style={{
+                            backgroundColor: theme,
+                            color: theme === "white" ? "black" : "white",
+                        }}
+                    >
+                        {
+                            filteredTodos.map(
+                                (todo) => (
+                                    <div key={todo.id}>{todo.task}</div>
+                                )
+                            )
+                        }
+                    </div>
+                );
+            };
+
+
+            const root = ReactDOM.createRoot( document.getElementById( 'root' ) );
+            root.render(
+                <App />
+            );
+        </script>
+    </body>
+</html>
 ```
-
-### 1.2 Create the `App` component
-
+- The problem is when you try to change the theme by clicking on the "Toggle theme" button - it will take some time. Even though switching themes is unrelated to the todos list, the expensive filtering and mapping operations still run again, causing a slow UI.
+- To avoid recomputation when `tab` or `todos` haven’t changed, use `React.useMemo()` to _memoize_ the filtered todos. Also memoize the list items. Use the memoized list items in the UI that is returned.
 ```jsx
-const App = () => {
-  const [tab, setTab] = React.useState("all");
-  const [theme, setTheme] = React.useState("white");
-
-  return (
-    <>
-      <button onClick={() => setTab("all")}>All</button>
-      <button onClick={() => setTab("done")}>Done</button>
-      <button onClick={() => setTab("not done")}>Not done</button>
-
-      <button onClick={() => setTheme(theme === "white" ? "black" : "white")}>
-        Toggle theme
-      </button>
-
-      <TodosFilter todos={todos} tab={tab} theme={theme} />
-    </>
-  );
-};
-```
-
-### 1.3 Filtering function and `TodosFilter` component
-
-```jsx
-const filterTodos = (todos, tab) => {
-  switch (tab) {
-    case "all":
-      return todos;
-    case "done":
-      return todos.filter((item) => item.done);
-    case "not done":
-      return todos.filter((item) => !item.done);
-  }
-};
-
 const TodosFilter = ({ todos, tab, theme }) => {
-  const filteredTodos = filterTodos(todos, tab);
+    const filteredTodos = React.useMemo( () => filterTodos(todos, tab), [ todos, tab ] );
 
-  const listItems = filteredTodos.map((todo) => (
-    <div key={todo.id}>{todo.task}</div>
-  ));
+    const listItems = React.useMemo(
+        () => {
+            return filteredTodos.map((todo) => (
+                <div key={todo.id}>{todo.task}</div>
+            ))
+        },
+        [ todos, tab ]
+    );
 
-  return (
-    <div
-      style={{
-        backgroundColor: theme,
-        color: theme === "white" ? "black" : "white",
-      }}
-    >
-      {listItems}
-    </div>
-  );
+    return (
+        <div
+            style={{
+                backgroundColor: theme,
+                color: theme === "white" ? "black" : "white",
+            }}
+        >
+            {listItems}
+        </div>
+    );
 };
 ```
+- Now the expensive computation of filtering and rendering the large todo list only happens when `tab` or `todos` change — not when you toggle the theme. This results in a **faster and more responsive** UI, especially noticeable with large datasets.
 
-### Problem
+## Step 22: Error Boundary - Showing a fallback UI on errors
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ErrorBoundary</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
 
-When you try to change the theme by clicking on the "Toggle theme" button it will take some time. Even though switching themes is unrelated to the todos list, the expensive filtering and mapping operations still run again, causing a slow UI.
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
 
----
+        <script type="text/babel">
+            class ErrorBoundary extends React.Component {
+                state = {
+                    error: null
+                };
 
-## Step 2: Add `useMemo()` for Optimization
+                // called when a descendant throws an error and it is still not handled
+                componentDidCatch(error) {
+                    // set state to show the error message instead of the child which is throwing an error
+                    this.setState({
+                        error
+                    });
+                }
 
-To avoid recomputation when `tab` or `todos` haven’t changed, use `useMemo()`:
+                render() {
+                    const { error } = this.state;
 
-### 2.1 Memoize the filtered todos
+                    if(error) {
+                        return <div>{error.message}</div>
+                    }
 
-```jsx
-const filteredTodos = React.useMemo(
-  () => filterTodos(todos, tab),
-  [todos, tab]
-);
+                    return this.props.children;
+                }
+            }
+
+            const SomeComponent = ({ throwError }) => {
+                if(throwError) {
+                    throw new Error('Some error occured');
+                }
+
+                return <div>I am some component</div>;
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+
+            root.render(
+                <React.Fragment>
+                    <ErrorBoundary>
+                        <SomeComponent throwError={true} />
+                    </ErrorBoundary>
+                    <SomeComponent throwError={false} />
+                </React.Fragment>
+            );
+        </script>
+    </body>
+</html>
 ```
 
-### 2.2 Memoize the list items
+## Step 23: Render props
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Render props</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
 
-```jsx
-const listItems = React.useMemo(
-  () =>
-    filteredTodos.map((todo) => (
-      <div key={todo.id}>{todo.task}</div>
-    )),
-  [filteredTodos]
-);
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            /**
+             * render props is a design pattern - for class components
+             *
+             * used when 2 component share ALL the functionality, EXCEPT the UI
+             *
+             * Intead of these 2 components
+             * WorkshopsListGrid
+             * WorkshopsListTable
+             *
+             * Have one component - WorkshopsList
+             *
+             * <WorkshopsList render={
+             *  ( workshops ) => (
+             *        <table>....</table>
+             *  )
+             * } />
+             *
+             * <WorkshopsList render={
+             *  ( workshops ) => (
+             *        <div className="grid">....</div>
+             *  )
+             * } />
+             *
+             * Internally WorkshopsList will call the passed render function to get the UI, then it will return the UI
+             */
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+
+            root.render(el);
+        </script>
+    </body>
+</html>
 ```
-
-### Benefit
-
-Now the expensive computation of filtering and rendering the large todo list only happens when `tab` or `todos` change — not when you toggle the theme.
-
-This results in a **faster and more responsive** UI, especially noticeable with large datasets.
-
----
-
-## Summary
-
-| Concept        | Purpose                                                  |
-| -------------- | -------------------------------------------------------- |
-| `useMemo`      | Avoids recalculating values unless dependencies change   |
-| Expensive work | Filtering 200k todos is CPU-intensive, must be optimized |
-| React UI lag   | Can be fixed by memoizing outputs based on actual needs  |
-
-Use `useMemo()` **when rendering or calculating large/computed values** that don't need to be recalculated on every render.
