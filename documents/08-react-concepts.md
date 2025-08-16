@@ -332,7 +332,7 @@ const Button = ({ title, icon }) => {
     - A class component should inherit from `React.Component`
     - The `render` method is mandatory and returns the defined UI (React element)
     - Props will be in a data member called `props` (accessed in the class as `this.props`).
-    - Event handlers can be set up using arrow function syntax (preferably) - this ensures the `this` is bound correctly in the method (to the class component instance). The method `clickHandler` needs to be referenced as `this.clickHandler`
+    - Event handlers can be set up using arrow function syntax (preferably) - this ensures the function context (`this`) is bound correctly in the method (to the class component instance). Another popular way to set up the correct binding for the function context is using the `bind()` method for functions (You can bind the context for the `clickHandler` method in the constructor for example). The method `clickHandler` needs to be referenced as `this.clickHandler`.
 ```jsx
 // props will be in a data member called props (this.props)
 class Button extends React.Component {
@@ -559,7 +559,7 @@ const Invoice = ({ customer, points, items }) => {
 };
 ```
 
-## Step 8: State and Event handling
+## Step 8: State and Event handling (`useState` hook)
 - We would like to delete items. The list to be rendered would change with time (as user deletes items), and the UI should update to show the (reduced) set of items - this calls for `state` to be maintained by the component. Make a copy of the final result from the previous step in `07-state-and-event-handling.html`. Now add, a column for actions (like delete), and a button on every row.
 ```html
 <table className="table table-striped table-bordered">
@@ -673,7 +673,7 @@ const Invoice = ({ customer, points, items }) => {
     - They can be used in function components, or functions called within function components (at the top-level). Such functions are called __custom hooks__.
     - Hooks can be called only in the top-level - cannot be used in event handlers, cannot be used in if block, for loop etc. in the component
 
-## Step 10: Handling side-effects in function components
+## Step 10: Handling side-effects in function components (`useEffect`)
 - In React, the component function should be pure - the UI is a function of __props__, __context__ (similar to props and covered later) and __state__ only.
 - A __side effect__ refers to any operation that interacts with the outside world or modifies a component's state in a way that isn't directly related to rendering. Examples of side effects include:
     - Fetching data from an API
@@ -839,4 +839,1199 @@ const WorkshopsList = () => {
     );
 };
 ```
-- __EXERCISE__: The useEffect effect function can return a __cleanup function__ (before an effect runs, the cleanup function returned by the previous run of the effect function, runs). Explore it.
+- __EXERCISE__: The function passed as the argument to `useEffect` can return a __cleanup function__ (before an effect runs, the cleanup function returned by the previous run of the effect function, runs). Explore it.
+
+## Step 11: Running side-effects in reaction to state or prop changes (`useEffect` with dependencies)
+- Many times we would like to run these side-effects when a state or prop for the component changes. We can do this by adding the state / prop dependencies in the dependencies array of `useEffect`.
+- Let us say we would like to implement pagination for the `WorkshopsList` component. Let us provide the UI for pagination. In `08-handling-side-effects-using-useEffect.html` add the UI.
+```jsx
+<h1>List of workshops</h1>
+<hr />
+
+<!-- Add this -->
+<div className="my-4">
+    <button className="btn btn-sm btn-primary me-2" onClick={previous} disabled={loading}>Previous</button>
+    <button className="btn btn-sm btn-primary" onClick={next} disabled={loading}>Next</button>
+    <div>You are viewing page {page}</div>
+</div>
+```
+- Add the state to maintain page number. Initially the first page loads.
+```jsx
+const [page, setPage] = React.useState(1);
+```
+- Add the `next` and `previous` click event handlers
+```jsx
+const previous = () => {
+    if( page <= 1 ) {
+        return;
+    }
+
+    // If the new state depends on the current state, use the function form of the state setter to make the state change
+    setPage(p => p - 1);
+};
+
+const next = () => {
+    // This backend does not return the total count of pages - else we could prevent change of page on the last page like so...
+    // if( page === numPages ) {
+    //     return;
+    // }
+
+    // If the new state depends on the current state, use the function form of the state setter to make the state change
+    setPage(p => p + 1);
+}
+```
+- __NOTE__: The state is set asyncronously by React (i.e. not as soon as you call the setter function for the state). If the new state depends on the current state, it is better to use the function form of the setter - this is called when React is actually about to change the state and receives the current value state. You should use this value passed as the argument to generate and return the new value of state. This ensures that state updates correctly even when the setter is called synchronously (multiple times in the same render cycle).
+- Modify the service method to accept a `page` argument and get only the workshops for the required page
+```jsx
+const getWorkshops = async (page = 1) => {
+    const response = await axios.get(
+        `https://workshops-server.onrender.com/workshops`,
+        {
+            params: {
+                _page: page
+            }
+        }
+    );
+
+    return response.data;
+};
+```
+- Finally, update the `useEffect` call to make the call to the backend when `page` changes. Pass the `page` to `getWorkshops()`. Also add `page` to the dependencies array.
+```jsx
+React.useEffect(
+    // side-effects can return undefined, or need to return a function called a cleanup function
+    // async function returns a Promise, therefore you cannot make the side-effect function async
+    () => {
+        setLoading(true);
+
+        const helper = async () => {
+            try {
+                const workshops = await getWorkshops(page);
+
+                console.log(workshops);
+
+                setWorkshops(workshops);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        helper();
+    },
+
+
+    // dependency array
+    // If we give [] for the dependency array, the side-effect runs only when the components loads for the first time (appears on the screen) - the effect does not depend on any other variable changes
+    // We need to run the effect when page changes - hence add `page` to the array
+    [ page ] 
+);
+```
+- You should now be able to move from one page to another.
+- __NOTE__: We have seen a state variable being added to the dependencies array. This array, in general, can have state, props or context values (Context API is covered later).
+
+## Step 12: Handling state And effects in class components (`componentDidMount`)
+- We create a `WorkshopsList` component in `09-handling-state-and-side-effects-class-components.html`. The `getWorkshops` service method remains the same.
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Handling state and side-effects - Class components</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.8/axios.min.js"></script>
+
+        <script type="text/babel">
+            const getWorkshops = async (page = 1) => {
+                const response = await axios.get(
+                    `https://workshops-server.onrender.com/workshops`,
+                    {
+                        params: {
+                            _page: page
+                        }
+                    }
+                );
+
+                return response.data;
+            };
+
+            class WorkshopsList extends React.Component {
+                render() {
+                    return (
+                        <div className="container my-4">
+                            <h1>List of workshops</h1>
+                            <hr />
+                        </div>
+                    );
+                }
+            }
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+
+            root.render(<WorkshopsList />);
+        </script>
+    </body>
+</html>
+```
+- We add states `loading`, `workshops`, `error`, to an property called `state` (always an object). The state can be set directly, or inside a constructor (do not forget to call the super class constructor in this case). As before, we show a spinner for as long as the `loading` state is `true` (we destructure in order to avoid accessing the props using `this` each time).
+```jsx
+class WorkshopsList extends React.Component {
+    // The base class - React.Component, has a method called `setState()` which is used to make the state changes
+    // Option 1: Initialize the state directly
+    state = {
+        loading: true,
+        workshops: [],
+        error: null,
+        page: 1
+    };
+
+    // Option 2: Initialize the state in a constructor - do not forget to call the super class constructor in this case!
+    // constructor(props) {
+    //     super(props);
+
+    //     this.state = {
+    //         loading: true
+    //     };
+    // }
+
+    render() {
+        const { loading, workshops, error } = this.state;
+
+        return (
+            <div className="container my-4">
+                <h1>List of workshops</h1>
+                <hr />
+
+                {loading === true && (
+                    <div className="d-flex justify-content-center">
+                        <div className="spinner-border" role="status">
+                            <span className="visually-hidden">
+                                Loading...
+                            </span>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+}
+```
+- We set up the API call to be initiated on component load - this is done in the `componentDidMount` lifecycle method which is called once - AFTER the first render (i.e. on DOM render - when the component shows up on the screen for the first time, after a page loads). The `setState()` method inherited from the base `React.Component` class is used to update the state. Only values to be updated are passed in the object passed an argument to `setState`. When state updates, React, as always, re-renders the component.
+```jsx
+class WorkshopsList extends React.Component {
+    // state setup etc.
+    // ...
+
+    render() {
+        const { loading, workshops, error } = this.state;
+
+        return (
+            <div className="container my-4">
+                <h1>List of workshops</h1>
+                <hr />
+
+                {loading === true && (
+                    <div className="d-flex justify-content-center">
+                        <div className="spinner-border" role="status">
+                            <span className="visually-hidden">
+                                Loading...
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {error !== null && loading === false && (
+                    <div class="alert alert-danger" role="alert">
+                        {error.message}
+                    </div>
+                )}
+
+                {
+                    error === null && loading === false && (
+                        workshops.map((w) => (
+                            <div key={w.id}>{w.name}</div>
+                        ))
+                    )
+                }
+            </div>
+        )
+    }
+
+    // Is called AFTER the first render, and never again
+    // equivalent to calling useEffect and passing []
+    async componentDidMount() {
+        // In the object passed to setState() you include only the state properties you want to change - the other state properties maintain their current values
+        this.setState({
+            loading: true
+        });
+
+        try {
+            const workshops = await getWorkshops();
+
+            this.setState({
+                loading: false,
+                // workshops: workshops
+                workshops
+            });
+        } catch (error) {
+            this.setState({
+                loading: false,
+                // error: error
+                error
+            });
+        }
+    }
+}
+```
+- You should see the first page of wokshops being shown now.
+- __NOTE__: The `setState` method has a function form which is recommended to be used when the new state depends on the current state.
+- __EXERCISE__: Class components have a __cleanup lifecycle method__ called `componentWillUnmount` (runs just once - before the component is removed from the DOM, i.e. it disappears from the screen). Explore it.
+
+## Step 13: `componentDidUpdate` - Running side-effects in reaction to state or prop changes in class components
+- Let us now implement pagination in class component. We add page state. We also the UI for pagination and methods for moving to the next and previous pages (they change the `page` state). Since state changes are asynchronous, we prefer using the __overload__ of `setState` that takes a function as an argument - this is the recommended way when the new state depends on the current state (rg. new page number depends on the current value of the page number).
+```jsx
+state = {
+    loading: true,
+    workshops: [],
+    error: null,
+    page: 1
+};
+```
+```jsx
+previous = () => {
+    if( this.state.page <= 1 ) {
+        return;
+    }
+
+    // object argument of setState()
+    // this.setState({
+    //     page: this.state.page - 1
+    // })
+
+    // function argument of setState() -> use this when the new state depends on the current state
+    this.setState(curState => {
+        return {
+            page: curState.page - 1
+        };
+    });
+};
+
+next = () => {
+    // if( this.state.page === numPages ) {
+    //     return;
+    // }
+
+    // If the new state depends on the current state, use the function form of the state setter to make the state change
+    this.setState(curState => {
+        return {
+            page: curState.page + 1
+        };
+    });
+}
+```
+```jsx
+<h1>List of workshops</h1>
+<hr />
+
+<div className="my-4">
+    <button className="btn btn-sm btn-primary me-2" onClick={this.previous} disabled={loading}>Previous</button>
+    <button className="btn btn-sm btn-primary" onClick={this.next} disabled={loading}>Next</button>
+    <div>You are viewing page {page}</div>
+</div>
+```
+- There is a lifecycle method that is called AFTER `render` runs when prop / state changes - this is `componentDidUpdate`. It receives the old value of props and state. We check what prop / state actually changed and execute some logic appropriately. It is very important to do this check - else you may end up with endlessly running render cycles due to repeated state changes! Since the logic for `componentDidMount` and `componentDidUpdate` is largely the same, we isolate the common code into a new method - `getWorkshops`.
+```jsx
+async getWorkshops() {
+    // In the object passed to setState() you include only the state properties you want to change - the other state properties maintain their current values
+    this.setState({
+        loading: true
+    });
+
+    try {
+        const workshops = await getWorkshops(this.state.page);
+
+        this.setState({
+            loading: false,
+            // workshops: workshops
+            workshops
+        });
+    } catch (error) {
+        this.setState({
+            loading: false,
+            // error: error
+            error
+        });
+    }
+}
+
+// Is called AFTER the first render, and never again
+// equivalent to calling useEffect and passing []
+async componentDidMount() {
+    this.getWorkshops();
+}
+
+// called when props / state changes
+// is called AFTER second render, AFTER third render (i.e. AFTER every re-render)
+async componentDidUpdate(prevProps, prevState) {
+    if( prevState.page !== this.state.page) { // similar to having a dependency array in useEffect() in functon component
+        this.getWorkshops();
+    }
+}
+```
+- You should now be able to move from one page to another.
+- __NOTE__: The creators of React realized that these 2 lifecycle methods often share common logic, and hence designed the `useEffect` hook (for function components) in such a way that sharing such logic is natural!
+
+## Step 14: The `useReducer` hook
+- `useReducer` is a hook that can be used in place of `useState` to maintain component state. It is no more, or no less powerful than `useState`. However it's advantage is that it can encapsulate the logic behind multiple related state changes in one function (referred to as the __reducer__), thereby making the component state changes obvious and clear to the developer.
+- Let us rewrite `WorkshopsList` component to instead maintain state using `useReducer`. Create `10-useReducer-workshops-list.html`.
+    - In it add a reducer function - we shall fill in the code for it later. The reducer function is called every time the components initiates a change of state - it is passed the current state, and an __action__. An action, as we shall see, is an object that captures the requested state change in the form of an object.
+    - The state is maintained (usually) as an object when using `useReducer` - it is passed along with the reducer function. The state object captures multiple pieces of related state.
+    - The `useReducer` hook returns the current state object, and a `dispatch` method (which is used to initiate state changes and is similar to the setter function returned by `useState`).
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Maintaining state - useReducer</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.8/axios.min.js"></script>
+
+        <script type="text/babel">
+            const getWorkshops = async (page = 1) => {
+                const response = await axios.get(
+                    `https://workshops-server.onrender.com/workshops`,
+                    {
+                        params: {
+                            _page: page
+                        }
+                    }
+                );
+
+                return response.data;
+            };
+
+            // Given the current state, and action (what happened in the app), reducer returns the new state
+            const workshopsReducer = (curState, action) => {
+                // We shall fill the code later
+                // ...
+            };
+
+            const WorkshopsList = () => {
+                const [state, dispatch] = React.useReducer(
+                    workshopsReducer,
+                    {
+                        loading: true,
+                        workshops: [],
+                        error: null
+                    }
+                );
+
+                const { loading, workshops, error } = state;
+
+                return (
+                    <div className="container my-4">
+                        <h1>List of workshops</h1>
+                        <hr />
+
+                        {loading === true && (
+                            <div className="d-flex justify-content-center">
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">
+                                        Loading...
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {error !== null && loading === false && (
+                            <div class="alert alert-danger" role="alert">
+                                {error.message}
+                            </div>
+                        )}
+
+                        {
+                            error === null && loading === false && (
+                                workshops.map((w) => (
+                                    <div key={w.id}>{w.name}</div>
+                                ))
+                            )
+                        }
+                    </div>
+                );
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+
+            root.render(<WorkshopsList />);
+        </script>
+    </body>
+</html>
+```
+- We now add side-effect to initiate data fetch on component mount. The `dispatch` method is used to initiate state changes (like the setter method when using `useState`).
+    - The `dispatch` method is passed an __action__.
+    - An action is an object with a `type` property that uniquely identifies the kind of state change required.
+    - Any extra information to be passed to the reducer is conventionally added inside a property called __payload__ (although it can be called anything else).
+    - When an action is dispatched, React calls the reducer function, and passes it the current state and the action.
+    - We define add below the action types as well - they must be unique and are usually string values that enable the identify the type of state change needed.
+```jsx
+const FETCHING = 'FETCHING';
+const FETCHED_WORKSHOPS = 'FETCHED_WORKSHOPS';
+const ERROR_FETCHING_WORKSHOPS = 'ERROR_FETCHING_WORKSHOPS';
+
+const WorkshopsList = () => {
+    // state set up using useReducer
+    // ...
+
+    React.useEffect(
+        () => {
+            /**
+             * action will be an object with `type` indicating what happened in the component
+             *  {
+                    type: 'FETCHING'
+                }
+                *
+                */
+            dispatch({
+                type: FETCHING
+            });
+
+            const helper = async () => {
+                try {
+                    const workshops = await getWorkshops();
+                    // the extra info to be passed to the reducer is conventionally put inside payload: {}
+                    // When dispatch is called -> React will call workshopsReducer like so...
+                    // workshopsReducer(
+                    //     { // curState
+                    //         loading: true,
+                    //         workshops: [],
+                    //         error: null,
+                    //         page: 1
+                    //     },
+                    //     { // action
+                    //         type: 'FETCHED_WORKSHOPS',
+                    //         payload: {
+                    //             // workshops: workshops
+                    //             workshops
+                    //         }
+                    //     }
+                    // )
+
+                    dispatch({
+                        type: FETCHED_WORKSHOPS,
+                        payload: {
+                            // workshops: workshops
+                            workshops
+                        }
+                    });
+                } catch (error) {
+                    dispatch({
+                        type: ERROR_FETCHING_WORKSHOPS,
+                        // error: error
+                        error
+                    });
+                }
+            };
+
+            helper();
+        },
+        []
+    );
+
+    // rest of code
+    // ...
+}
+```
+- Now define the reducer that is called when actions are dispatched. The reducer checks the current state and action and returns the new state. If it does not handle an action it must return the state unchanged.
+    - The reducer MUST be a __pure function__
+        - Should not change the arguments it receives (state and action)
+        - Should not use global state or functions
+        - Should be deterministic - should return a well-determined value for every combination of state and action
+    - Since it should not changes the current state, we commonly use the spread operator to create copies of objects when creating the new state to be returned.
+```jsx
+// Given the current state, and action (what happened in the app), reducer returns the new state
+const workshopsReducer = (curState, action) => {
+    let newState;
+
+    switch(action.type) {
+        case FETCHING:
+            newState = {
+                ...curState, // spread the curState -> copies all properties in the current state object
+                loading: true,
+            };
+            break;
+        case FETCHED_WORKSHOPS:
+            // arr = [1, 2, 3, 4]
+            // x = [ ...arr ] // [ 1, 2, 3, 4 ]
+            // x[3] = 5 // [ 1, 2, 3, 5 ]
+            newState = {
+                ...curState, // spread the curState -> copies all properties in the current state object
+                loading: false,
+                workshops: action.payload.workshops
+            };
+            break;
+        case ERROR_FETCHING_WORKSHOPS:
+            newState = {
+                ...curState, // spread the curState -> copies all properties in the current state object
+                loading: false,
+                workshops: action.payload.error
+            };
+            break;
+        default:
+            newState = curState; // no state change
+
+    }
+
+    return newState;
+};
+```
+- You should now be able to see the workshops load.
+- __TIP__: If you have many pieces of state related to each other that go hand-in-hand, and there are many state changes related to them (like in this example), go for `useReducer` (if it appeals to you).
+
+## Step 15: Exercise - Setting up pagination using the reducer
+- Can you set up pagination using the reducer?
+    - Add page state, and call the service, passing the page - add page as a dependency for the effect
+    - Add action types for page change requests (__NEXT_PAGE__ and __PREVIOUS_PAGE__, say)
+    - Add the UI for pagination
+    - Dispatch actions in `next` and `previous` methods
+    - Add state change logic for these new actions, inside the reducer
+__Solution__
+- Add page state, and call the service, passing the page - add page as a dependency for the effect
+```jsx
+const [state, dispatch] = React.useReducer(
+    workshopsReducer,
+    {
+        loading: true,
+        workshops: [],
+        error: null,
+        page: 1
+    }
+);
+
+const { loading, workshops, error, page } = state;
+```
+```jsx
+React.useEffect(
+    () => {
+        dispatch({
+            type: FETCHING
+        });
+
+        const helper = async () => {
+            try {
+                const workshops = await getWorkshops(page);
+                
+                // rest of code...
+                // ...
+            } catch (error) {
+                // ...
+            }
+        }
+
+        helper()
+    },
+    [ page ]
+);
+```
+- Add action types for page change requests (__NEXT_PAGE__ and __PREVIOUS_PAGE__, say)
+```jsx
+const PREVIOUS_PAGE = 'PREVIOUS_PAGE';
+const NEXT_PAGE = 'NEXT_PAGE';
+```
+- Add the UI for pagination
+```jsx
+<div className="my-4">
+    <button className="btn btn-sm btn-primary me-2" onClick={previous} disabled={loading}>Previous</button>
+    <button className="btn btn-sm btn-primary" onClick={next} disabled={loading}>Next</button>
+    <div>You are viewing page {page}</div>
+</div>
+```
+- Dispatch actions in `next` and `previous` methods
+```jsx
+const previous = () => {
+    if( page <= 1 ) {
+        return;
+    }
+
+    dispatch({
+        type: PREVIOUS_PAGE
+    });
+};
+
+const next = () => {
+    dispatch({
+        type: NEXT_PAGE
+    });
+}
+```
+- Add state change logic for these new actions, inside the reducer
+```jsx
+case PREVIOUS_PAGE:
+    newState = {
+        ...curState,
+        page: curState.page - 1
+    };
+    break;
+case NEXT_PAGE:
+    newState = {
+        ...curState,
+        page: curState.page + 1
+    };
+    break;
+```
+- You should now be able to move from one page to another.
+
+## Step 16: Higher-Order Component (HOC) - A design pattern for sharing logic in class components
+- Often multiple components need to implement some common feature and hence need to share logic. Examples include
+    - pagination
+    - filtering a list
+    - etc.
+- For class components, this is typically done by following a design pattern called __Higher-Order Component (HOC)__. We shall learn this pattern through the following steps (building 2 components that both need a "counter" feature)
+    1. Build two components that share counter functionality
+    2. Identify repeated logic
+    3. Refactor the logic using a Higher-Order Component (HOC)
+- Start with Basic Components. In `11-hoc.html` we create two independent components — `WorkshopsList` and `Counter` — that both have their own counter logic.
+```jsx
+class WorkshopsList extends React.Component {
+  state = { value: 1 };
+
+  nextValue = () => {
+    this.setState({ value: this.state.value + 1 });
+  };
+
+  previousValue = () => {
+    this.setState({ value: this.state.value - 1 });
+  };
+
+  render() {
+    return (
+      <div className="card p-3 my-3">
+        <h4>List of Workshops</h4>
+        <div className="d-flex align-items-center gap-2">
+          <button className="btn btn-outline-secondary" onClick={this.previousValue}>&lt;</button>
+          <span className="fs-5">{this.state.value}</span>
+          <button className="btn btn-outline-primary" onClick={this.nextValue}>&gt;</button>
+        </div>
+        <p className="text-muted mt-2">(Other workshop content would go here)</p>
+      </div>
+    );
+  }
+}
+
+class Counter extends React.Component {
+  state = { value: 1 };
+
+  nextValue = () => {
+    this.setState({ value: this.state.value + 1 });
+  };
+
+  previousValue = () => {
+    this.setState({ value: this.state.value - 1 });
+  };
+
+  render() {
+    return (
+      <div className="card p-3 my-3">
+        <h4>Counter</h4>
+        <div className="d-flex align-items-center gap-2">
+          <button className="btn btn-outline-secondary" onClick={this.previousValue}>-</button>
+          <span className="fs-5">{this.state.value}</span>
+          <button className="btn btn-outline-success" onClick={this.nextValue}>+</button>
+        </div>
+      </div>
+    );
+  }
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
+  <div className="container my-4">
+    <WorkshopsListContainer />
+    <CounterContainer />
+  </div>
+);
+```
+
+- Both components manage counter logic **independently** — not ideal if logic needs to be reused or updated later. We refactor to Create a Higher-Order Component. We extract the shared logic into a reusable **HOC** that can wrap any component needing a counter.
+- Conventionally, the names of HOCs begin with `with`
+- Note that the name `Higher-Order Component` is a bit misleading. HOC is a __function__ that creates a wrapper component for the given component, and returns the wrapper
+
+```jsx
+const withCounter = (WrappedComponent) => {
+  return class extends React.Component {
+    state = { value: 1 };
+
+    nextValue = () => {
+      this.setState({ value: this.state.value + 1 });
+    };
+
+    previousValue = () => {
+      this.setState({ value: this.state.value - 1 });
+    };
+
+    render() {
+      return (
+        <WrappedComponent
+          {...this.props}
+          value={this.state.value}
+          nextValue={this.nextValue}
+          previousValue={this.previousValue}
+        />
+      );
+    }
+  };
+};
+```
+- This HOC provides `value`, `nextValue()`, and `previousValue()` as **props** to any component it wraps
+- Next, we refactor the components to use the `withCounter` HOC
+- `WorkshopsList` (with HOC props)
+```jsx
+class WorkshopsList extends React.Component {
+  render() {
+    return (
+      <div className="card p-3 my-3">
+        <h4>List of Workshops</h4>
+        <div className="d-flex align-items-center gap-2">
+          <button className="btn btn-outline-secondary" onClick={this.props.previousValue}>&lt;</button>
+          <span className="fs-5">{this.props.value}</span>
+          <button className="btn btn-outline-primary" onClick={this.props.nextValue}>&gt;</button>
+        </div>
+        <p className="text-muted mt-2">(Other workshop content would go here)</p>
+      </div>
+    );
+  }
+}
+```
+- `Counter` (with HOC props)
+
+```jsx
+class Counter extends React.Component {
+  render() {
+    return (
+      <div className="card p-3 my-3">
+        <h4>Counter</h4>
+        <div className="d-flex align-items-center gap-2">
+          <button className="btn btn-outline-secondary" onClick={this.props.previousValue}>-</button>
+          <span className="fs-5">{this.props.value}</span>
+          <button className="btn btn-outline-success" onClick={this.props.nextValue}>+</button>
+        </div>
+      </div>
+    );
+  }
+}
+```
+- Wrap them using the HOC
+```jsx
+const WorkshopsListContainer = withCounter(WorkshopsList);
+const CounterContainer = withCounter(Counter);
+```
+- Render It All (use the generated container component , i.e. wrapper component)
+```jsx
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
+  <div className="container my-4">
+    <WorkshopsListContainer />
+    <CounterContainer />
+  </div>
+);
+```
+- __NOTES__:
+- HOCs are often written as functions that return functions (following the __function currying / partial argument application pattern__ that aids function composition using composition helpers). This helps customize generated container components by accepting arguments in the HOC, and customizing the container accordingly - eg. to have different initial values for the counter in 2 components. This is covered in the next (optional) step. Note that we cover this is shared logic for function component (in the section on custom hooks that follows).
+- HOCs are not important nowadays as class components have fallen out of favor. The main reason for class components being discouraged is in fact the complexity for sharing logic using HOCs. Custom hooks that do this for function components are much simpler and easier to understand!
+
+## Step 17 (Optional) - Refactor to support HOC composition - Create a Higher-Order Component with Initial Value Support
+- We will refactor the logic for HOCs to enable easy composition (using more than one HOC using a function composition helper). An example of this would be how the `connect` function of earlier versions `react-redux` worked (to support class components in an app using Redux).
+- We extract the shared logic into a reusable **HOC** using __function currying / partial argument application pattern__. This allows us to pass an **initial value** to the counter state.
+
+```jsx
+const withCounter = (initialValue) => (WrappedComponent) => {
+  return class extends React.Component {
+    state = { value: initialValue };
+
+    nextValue = () => {
+      this.setState({ value: this.state.value + 1 });
+    };
+
+    previousValue = () => {
+      this.setState({ value: this.state.value - 1 });
+    };
+
+    render() {
+      return (
+        <WrappedComponent
+          {...this.props}
+          value={this.state.value}
+          nextValue={this.nextValue}
+          previousValue={this.previousValue}
+        />
+      );
+    }
+  };
+};
+```
+- Refactor the components to use the refactored HOC
+```jsx
+const WorkshopsListContainer = withCounter(1)(WorkshopsList);
+const CounterContainer = withCounter(10)(Counter);
+```
+
+## Step 18: Custom Hooks in React – Counter Refactor Tutorial
+- Custom hooks are how we share logic for a common features across function-based components. Custom hooks maintain shared state, effect logic etc. (they will use one or more built-in React hooks).
+- In `12-custom-hooks.html`, start with the same 2 components, now rewritten using functions. Rewrite the `WorkshopsList` and `Counter` as function components. Use `useState` for maintaining state. This is left as an exercise. 
+- Next we create a custom hook for the shared logic. - create the `useCounter` hook. Note that the names of hooks (including custom hooks) are conventionally prefixed with `use`.
+```jsx
+function useCounter(initialValue = 0) {
+  const [value, setValue] = React.useState(initialValue);
+
+  const nextValue = () => setValue((v) => v + 1);
+  const previousValue = () => setValue((v) => v - 1);
+
+  return { value, nextValue, previousValue };
+}
+```
+- Refactor the function components to use the `useCounter` custom hook
+- `WorkshopsList` (function version)
+```jsx
+function WorkshopsList() {
+  const { value, nextValue, previousValue } = useCounter(1);
+
+  return (
+    <div className="card p-3 my-3">
+      <h4>List of Workshops</h4>
+      <div className="d-flex align-items-center gap-2">
+        <button className="btn btn-outline-secondary" onClick={previousValue}>&lt;</button>
+        <span className="fs-5">{value}</span>
+        <button className="btn btn-outline-primary" onClick={nextValue}>&gt;</button>
+      </div>
+    </div>
+  );
+}
+```
+- `Counter` (function version)
+```jsx
+function Counter() {
+  const { value, nextValue, previousValue } = useCounter(10);
+
+  return (
+    <div className="card p-3 my-3">
+      <h4>Counter</h4>
+      <div className="d-flex align-items-center gap-2">
+        <button className="btn btn-outline-secondary" onClick={previousValue}>-</button>
+        <span className="fs-5">{value}</span>
+        <button className="btn btn-outline-success" onClick={nextValue}>+</button>
+      </div>
+    </div>
+  );
+}
+```
+- Obviously custom hooks are a very natural way to share stateful logic. In fact it cannot be even called a pattern. HOCs are surely more complex. This is the main reason we prefer using function components.
+
+## Step 19: "Lifting state" (sharing state across components)
+- When 2 components need access to a common state, where do we maintain it, and how doe= the components get the state / setter for the state?
+- Such shared state is maintained in a common ancestor of the components in the component tree. This way we can __drill down the props__ to the components (React supports only top-down flow of data through props).
+- In `13-lifting-state-props-drilling.html`, we build a `Panel` component with `PanelQuestion` and `PanelAnswer` as child components.
+```css
+.panel {
+    border: 1px solid #333;
+    border-radius: 4px;
+    margin: 16px;
+}
+
+.panel-question,
+.panel-answer {
+    padding: 1em;
+}
+
+.panel-question {
+    background-color: #333;
+    color: ivory;
+}
+```
+```jsx
+const PanelQuestion = ({ question }) => {
+  return (
+    <div className="panel-question">
+      {question}
+    </div>
+  );
+};
+
+const PanelAnswer = ({ children }) => {
+  return <div className="panel-answer">{children}</div>;
+};
+
+const Panel = ({ question, children }) => {
+  return (
+    <div className="panel">
+      <PanelQuestion question={question} />
+      <PanelAnswer>{children}</PanelAnswer>
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
+    <div className="container my-4">
+        <Panel
+            question="What is React?"
+            answer="It is a library for frontend apps"
+        />
+        <Panel
+            question="What is Redux?"
+            answer="It is a state management library"
+        />
+    </div>
+);
+```
+- We would like to add and remove the `PanelAnswer` when `PanelQuestion` is clicked.
+    * We do require state to maintain the visible / hidden status of the `PanelAnswer` component instance
+    * At the same time we should be able to toggle this state when the `PanelQuestion` is clicked
+    * A boolean will do as there are only 2 possible values for the state
+    * But where can we maintain this state? Since both children need access to the state / setter for the state, we store this shared state in their common ancestor, i.e. the parent `Panel` component. We also define a helper `toggle` function that is passed as a __callback prop__ (i.e. a _function prop_).
+```jsx
+const PanelQuestion = ({ question, toggle }) => {
+    return (
+        <div className="panel-question" onClick={toggle}>
+            {question}
+        </div>
+    );
+};
+
+const PanelAnswer = ({ answer, show }) => {
+    return show ? (
+        <div className="panel-answer">{answer}</div>
+    ) : null;
+};
+
+const Panel = ({ question, answer }) => {
+    const [show, setShow] = React.useState(true);
+
+    const toggle = () => {
+        setShow((s) => !s);
+    };
+
+    return (
+        <div className="panel">
+            <PanelQuestion question={question} toggle={toggle} />
+            <PanelAnswer answer={answer} show={show} />
+        </div>
+    );
+};
+```
+- __TAKEAWAY__: When you need state shared between multiple components, one way is to create that state in a common ancestor, and drill it down the component hierarchy as props. Later (in the workshops app) we see the problem associated with props drilling, and how the __Context API__ of React, or an external state management library like __Redux__ helps overcome it.
+
+## Step 20: Performance optimization: `React.memo()` and `React.useCallback()` – Preventing unnecessary re-renders when props do not change (especially when passing callback props)
+- In this example we optimize component rendering in React using `React.memo()` and `React.useCallback()` hook. We'll go step-by-step, starting with a base version and incrementally enhancing it. We will use the `Panel` component created above as the starting ppoint.
+    * We demonstrate unnecessary re-renders.
+    * Then prevent them using `React.memo()` and `React.useCallback()`
+
+- In `14-preventing-unnecessary-renders-memo-and-useCallback.html`, we add logs in the function components to see when they render. You can also track re-renders along with rendering time etc. in the Profiler tab that comes with React Developer Tools extension for Chrome.
+```jsx
+const PanelQuestion = ({ question, toggle }) => {
+  console.log("PanelQuestion");
+
+  return (
+    <div className="panel-question" onClick={toggle}>
+      {question}
+    </div>
+  );
+};
+
+const PanelAnswer = ({ children, open }) => {
+  console.log("PanelAnswer");
+
+  return open ? <div className="panel-answer">{children}</div> : null;
+};
+
+const Panel = ({ question, children }) => {
+  console.log("Panel");
+
+  const [open, setOpen] = React.useState(true);
+
+  const toggle = () => setOpen((s) => !s);
+
+  return (
+    <div className="panel">
+      <PanelQuestion question={question} toggle={toggle} />
+      <PanelAnswer open={open}>{children}</PanelAnswer>
+    </div>
+  );
+};
+```
+- Try it and check the console logs — clicking toggles the panel but re-renders all components. Would `PanelQuestion` need to be re-rendered? No! Its UI does not changes across renders. Usually such unnecessary re-renders do not harm the performance (virtual DOM takes care of preventing DOM manipulation when not necessary anyway), but sometimes when the UI is large (there are many descendant components of the unnecessarily rendered component), it can hurt. Can we do better?
+- This is where React.memo() comes in. Normally, when a parent component re-renders, React also re-invokes the render function of its child components. Even if the child’s props haven’t changed, this can still happen. By wrapping a function component in React.memo(), React will _skip re-rendering_ that component __if its props are shallowly equal to the previous render__, preventing unnecessary re-renders (you can pass a _custom comparison function_ if you need _deeper checks_ - left for you to explore).
+- __NOTE__: State changes inside the child or changes to context values (the _Context API_) will still trigger re-renders, even with `React.memo()`
+- Wrap `PanelQuestion` in `React.memo`:
+
+```jsx
+const PanelQuestion = React.memo(({ question, toggle }) => {
+  console.log("PanelQuestion");
+
+  return (
+    <div className="panel-question" onClick={toggle}>
+      {question}
+    </div>
+  );
+});
+```
+- This should prevent unnecessary re-render. Try it. But you will see it re-render still every time you click the question! Why?
+- The subtlety lies in th fact that the `toggle` callback prop is an inner function (a local variable within the `Panel` function) that gets recreated every time `Panel` runs, i.e. renders. Therefore, we need to prevent it from being recreated unnecessarily and this is where `React.useCallback` hook (used with callback props) comes in.
+- Update `Panel` to wrap `toggle` using `React.useCallback`. This memoizes the function, and it shall be recreated only when its dependenc, i.e. `setOpen` is recreated (which never happens as the setter function for a state is stable).
+```jsx
+const toggle = React.useCallback(() => setOpen((s) => !s), [setOpen]);
+```
+- __IMPORTANT__: Using both `React.memo()` and `React.useCallback()` in tandem is key when optimizing deeply nested or frequently updated components (and passing callback props).
+
+## Step 21: Performance optimization: `React.useMemo()` – Optimizing Expensive Computations inside components
+- We see how to use `useMemo()` to optimize performance in React components. We'll walk through a real-world use case where filtering a large dataset can become a performance bottleneck when unrelated state changes occur.
+
+## Step 1: Set Up the App Without `useMemo`
+
+### 1.1 Create a large list of todos
+
+```js
+const getTodos = () => {
+  const todos = [];
+  for (let i = 0; i < 200000; ++i) {
+    todos.push({
+      id: i + 1,
+      task: "Task " + (i + 1),
+      done: Math.random() < 0.5,
+    });
+  }
+  return todos;
+};
+
+const todos = getTodos();
+```
+
+### 1.2 Create the `App` component
+
+```jsx
+const App = () => {
+  const [tab, setTab] = React.useState("all");
+  const [theme, setTheme] = React.useState("white");
+
+  return (
+    <>
+      <button onClick={() => setTab("all")}>All</button>
+      <button onClick={() => setTab("done")}>Done</button>
+      <button onClick={() => setTab("not done")}>Not done</button>
+
+      <button onClick={() => setTheme(theme === "white" ? "black" : "white")}>
+        Toggle theme
+      </button>
+
+      <TodosFilter todos={todos} tab={tab} theme={theme} />
+    </>
+  );
+};
+```
+
+### 1.3 Filtering function and `TodosFilter` component
+
+```jsx
+const filterTodos = (todos, tab) => {
+  switch (tab) {
+    case "all":
+      return todos;
+    case "done":
+      return todos.filter((item) => item.done);
+    case "not done":
+      return todos.filter((item) => !item.done);
+  }
+};
+
+const TodosFilter = ({ todos, tab, theme }) => {
+  const filteredTodos = filterTodos(todos, tab);
+
+  const listItems = filteredTodos.map((todo) => (
+    <div key={todo.id}>{todo.task}</div>
+  ));
+
+  return (
+    <div
+      style={{
+        backgroundColor: theme,
+        color: theme === "white" ? "black" : "white",
+      }}
+    >
+      {listItems}
+    </div>
+  );
+};
+```
+
+### Problem
+
+When you try to change the theme by clicking on the "Toggle theme" button it will take some time. Even though switching themes is unrelated to the todos list, the expensive filtering and mapping operations still run again, causing a slow UI.
+
+---
+
+## Step 2: Add `useMemo()` for Optimization
+
+To avoid recomputation when `tab` or `todos` haven’t changed, use `useMemo()`:
+
+### 2.1 Memoize the filtered todos
+
+```jsx
+const filteredTodos = React.useMemo(
+  () => filterTodos(todos, tab),
+  [todos, tab]
+);
+```
+
+### 2.2 Memoize the list items
+
+```jsx
+const listItems = React.useMemo(
+  () =>
+    filteredTodos.map((todo) => (
+      <div key={todo.id}>{todo.task}</div>
+    )),
+  [filteredTodos]
+);
+```
+
+### Benefit
+
+Now the expensive computation of filtering and rendering the large todo list only happens when `tab` or `todos` change — not when you toggle the theme.
+
+This results in a **faster and more responsive** UI, especially noticeable with large datasets.
+
+---
+
+## Summary
+
+| Concept        | Purpose                                                  |
+| -------------- | -------------------------------------------------------- |
+| `useMemo`      | Avoids recalculating values unless dependencies change   |
+| Expensive work | Filtering 200k todos is CPU-intensive, must be optimized |
+| React UI lag   | Can be fixed by memoizing outputs based on actual needs  |
+
+Use `useMemo()` **when rendering or calculating large/computed values** that don't need to be recalculated on every render.
