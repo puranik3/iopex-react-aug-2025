@@ -433,24 +433,4 @@ import { getWorkshopsThunk, workshopsListSelector } from "../../../features/work
 
 ---
 ## Conclusion
-You have now integrated Redux Toolkit for theme management and fetching workshops efficiently! 🚀
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+You have now integrated Redux Toolkit for theme management and fetching workshops efficiently!
