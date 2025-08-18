@@ -51,6 +51,31 @@
                                 <div>Get exciting discounts by becoming a Loyal member</div>
                             )
                         }
+
+                        <table className="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    items.map(
+                                        item => (
+                                            <tr key={item.id}>
+                                                <td>{item.name}</td>
+                                                <td>{item.quantity}</td>
+                                                <td>{item.price}</td>
+                                                <td>{item.quantity * item.price}</td>
+                                            </tr>
+                                        )
+                                    )
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 );
             };
