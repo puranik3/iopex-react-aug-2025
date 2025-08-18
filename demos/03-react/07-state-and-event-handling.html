@@ -25,16 +25,32 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
 
         <script type="text/babel">
+            // React.useState(); // not ok
+
             const Invoice = ( { customer, items, points } ) => {
                 console.log( points );
-                const [ curItems, setCurItems ] = React.useState( items );
+                const [ curItems, setCurItems ] = React.useState( items ); // ok
 
-                const deleteItem = ( itemToDelete ) => {
+                // ok
+                // if() {
+                //     React.useState()
+                // }
+
+                // not ok
+                // for () {
+                //     React.useState()
+                // }
+
+                const deleteItem = ( itemToDelete, event ) => {
+                    // React.useState() // not ok
+                    console.log( event );
                     console.log( itemToDelete );
 
                     const newCurItems = curItems.filter( it => it.id !== itemToDelete.id );
                     setCurItems( newCurItems );
                 };
+
+                 React.useState( items ); // ok
 
                 return (
                     <div className="border border-dark p-4">
@@ -82,7 +98,7 @@
                                                 <td>
                                                     <button
                                                         className="btn btn-sm btn-danger"
-                                                        onClick={() => deleteItem( item )}
+                                                        onClick={(event) => deleteItem( item, event )}
                                                     >
                                                         Delete
                                                     </button>
