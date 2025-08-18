@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hello React</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            class Button extends React.Component {
+                // event handler methods are setup using arrow function syntax
+                clickHandler = () => {
+                    const { title } = this.props;
+
+                    alert( `Button with title ${title} was clicked` );
+                };
+
+                render() {
+                    const { title, icon } = this.props;
+
+                    return (
+                        <button onClick={this.clickHandler}>
+                            <i className={`fa-solid fa-${icon} me-1`}></i>
+                            { title }
+                            <i className="fa-solid fa-caret-down ms-1"></i>
+                        </button>
+                    );
+                }
+            }
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            root.render(
+                <React.Fragment>
+                    <Button title="Watch" icon="eye" />
+                    <Button title="Code" icon="code"></Button>
+                </React.Fragment>
+            );
+        </script>
+    </body>
+</html>
