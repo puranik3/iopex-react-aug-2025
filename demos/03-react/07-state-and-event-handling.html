@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>State and Event handling</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            const Invoice = ( { customer, items, points } ) => {
+                console.log( points );
+                const [ curItems, setCurItems ] = React.useState( items );
+
+                const deleteItem = ( itemToDelete ) => {
+                    console.log( itemToDelete );
+
+                    const newCurItems = curItems.filter( it => it.id !== itemToDelete.id );
+                    setCurItems( newCurItems );
+                };
+
+                return (
+                    <div className="border border-dark p-4">
+                        <h1>Invoice</h1>
+                        <hr />
+                        <div>Customer: {customer}</div>
+
+                        {
+                            // points !== undefined && (
+                            //     <div className="bg-info p-2">
+                            //         You have {points} points
+                            //     </div>
+                            // )
+                        }
+
+                        {
+                            points !== undefined ? (
+                                <div className="bg-info p-2">
+                                    You have {points} points
+                                </div>
+                            ) : (
+                                <div>Get exciting discounts by becoming a Loyal member</div>
+                            )
+                        }
+
+                        <table className="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    curItems.map(
+                                        item => (
+                                            <tr key={item.id}>
+                                                <td>{item.name}</td>
+                                                <td>{item.quantity}</td>
+                                                <td>{item.price}</td>
+                                                <td>{item.quantity * item.price}</td>
+                                                <td>
+                                                    <button
+                                                        className="btn btn-sm btn-danger"
+                                                        onClick={() => deleteItem( item )}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        )
+                                    )
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                );
+            };
+
+            const itemsJohn = [
+                {
+                    id: 1001,
+                    name: "Camlin Pen",
+                    price: 50,
+                    quantity: 5,
+                },
+                {
+                    id: 1002,
+                    name: "Natraj Pencils",
+                    price: 10,
+                    quantity: 30,
+                },
+                {
+                    id: 1003,
+                    name: "A4 Sheets",
+                    price: 200,
+                    quantity: 2,
+                },
+            ];
+
+            const itemsJane = [
+                ...itemsJohn,
+                {
+                    id: 1004,
+                    name: "Apsara Eraser",
+                    price: 15,
+                    quantity: 5,
+                },
+            ];
+
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            root.render(
+                <section className="container my-4">
+                    <Invoice
+                        customer="John Doe"
+                        items={itemsJohn}
+                        points={250}
+                    />
+                    <Invoice
+                        customer="Jane Doe"
+                        items={itemsJane}
+                    />
+                </section>
+            );
+        </script>
+    </body>
+</html>
