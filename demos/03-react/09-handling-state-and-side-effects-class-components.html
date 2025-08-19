@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hello React</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.8/axios.min.js"></script>
+
+        <script type="text/babel">
+            // service
+            const getWorkshops = async ( page = 1 ) => {
+                const response = await axios.get(
+                    `https://workshops-server.onrender.com/workshops`,
+                    {
+                        params: {
+                            _page: page
+                        }
+                    }
+                );
+                return response.data;
+            };
+
+            // setState() is inherited from React.Component
+            class WorkshopsList extends React.Component {
+                state = {
+                    workshops: [],
+                    loading: true,
+                    error: null
+                };
+
+                // constructor() {
+                //     this.state = {
+
+                //     };
+                // }
+
+                render() {
+                    const { workshops, loading, error } = this.state;
+
+                    return (
+                        <div className="container my-4">
+                            <h1>List of workshops</h1>
+                            <hr />
+
+                            {
+                                loading && (
+                                    <div className="d-flex justify-content-center">
+                                        <div className="spinner-border" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {
+                                !loading && error && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {error.message}
+                                    </div>
+                                )
+                            }
+
+                            {
+                                !loading && !error && (
+                                    <div className="row">
+                                        {
+                                            workshops.map(
+                                                workshop => (
+                                                    <div className="col col-3 d-flex my-3" key={workshop.id}>
+                                                        <div className="card p-3">
+                                                            <img src={workshop.imageUrl} className="card-img-top" alt={workshop.name} />
+                                                            <div className="card-body">
+                                                                <h5 className="card-title">{workshop.name}</h5>
+                                                                <p className="card-text">{workshop.startDate} - {workshop.endDate}</p>
+                                                                <a href="#" className="btn btn-primary">Know more</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            )
+                                        }
+                                    </div>
+                                )
+                            }
+                        </div>
+                    );
+                }
+
+                // This method runs AFTER the first render
+                async componentDidMount() {
+                    // mention in the object that is passed, whatever is to be updated
+                    this.setState({
+                        loading: true
+                    });
+
+                    try {
+                        const workshops = await getWorkshops();
+
+                        this.setState({
+                            // workshops: workshops
+                            workshops,
+                            loading: false
+                        });
+                    } catch( error ) {
+                        this.setState({
+                            // error: error
+                            error,
+                            loading: false
+                        });
+                    }
+                }
+            }
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            root.render(
+                <WorkshopsList />
+            );
+        </script>
+    </body>
+</html>

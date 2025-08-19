@@ -47,7 +47,9 @@
                 const [ page, setPage ] = React.useState( 1 );
                 const [ lastPage, setLastPage ] = React.useState( false );
 
-                // [] dependencies array -> effect function runs once (when component loads)
+                // how dependencies array works
+                // [] -> effect function runs once (when component loads)
+                // [ page, x ] -> effect function runs once when component loads + when page or x changes
 
                 React.useEffect(
                     // Warning: useEffect must not return anything besides a function, which is used for clean-up.
