@@ -28,9 +28,14 @@
 
         <script type="text/babel">
             // service
-            const getWorkshops = async () => {
+            const getWorkshops = async ( page = 1 ) => {
                 const response = await axios.get(
-                    `https://workshops-server.onrender.com/workshops`
+                    `https://workshops-server.onrender.com/workshops`,
+                    {
+                        params: {
+                            _page: page
+                        }
+                    }
                 );
                 return response.data;
             };
@@ -39,6 +44,7 @@
                 const [ workshops, setWorkshops ] = React.useState( [] );
                 const [ loading, setLoading ] = React.useState( true );
                 const [ error, setError ] = React.useState( null );
+                const [ page, setPage ] = React.useState( 1 );
 
                 // [] dependencies array -> effect function runs once (when component loads)
 
@@ -51,7 +57,7 @@
                             setLoading( true );
 
                             try {
-                                const workshops = await getWorkshops();
+                                const workshops = await getWorkshops( page );
                                 setWorkshops( workshops );
                             } catch( error ) {
                                 setError( error );
@@ -74,6 +80,13 @@
                     <div className="container my-4">
                         <h1>List of workshops</h1>
                         <hr />
+
+                        {/* Add this */}
+                        <div className="my-4">
+                            <button className="btn btn-sm btn-primary me-2" onClick={previous} disabled={loading}>Previous</button>
+                            <button className="btn btn-sm btn-primary" onClick={next} disabled={loading}>Next</button>
+                            <div>You are viewing page {page}</div>
+                        </div>
 
                         {
                             loading && (
