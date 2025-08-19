@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hello React</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.8/axios.min.js"></script>
+
+        <script type="text/babel">
+            // service
+            const getWorkshops = async () => {
+                const response = await axios.get(
+                    `https://workshops-server.onrender.com/workshops`
+                );
+                return response.data;
+            };
+
+            const WorkshopsList = () => {
+                const [ workshops, setWorkshops ] = React.useState( [] );
+                const [ loading, setLoading ] = React.useState( true );
+
+                // [] dependencies array -> effect function runs once (when component loads)
+                React.useEffect(
+                    async () => { // effect
+                        setLoading( true );
+
+                        const workshops = await getWorkshops();
+                        setWorkshops( workshops );
+
+                        setLoading( false );
+                    },
+                    [] // dependencies array
+                );
+
+                return (
+                    <div className="container my-4">
+                        <h1>List of workshops</h1>
+                        <hr />
+
+                        {
+                            loading && (
+                                <div class="d-flex justify-content-center">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {
+                            !loading && (
+                                <div className="row">
+                                    {
+                                        workshops.map(
+                                            workshop => (
+                                                <div className="col col-3">{workshop.name}</div>
+                                            )
+                                        )
+                                    }
+                                </div>
+                            )
+                        }
+                    </div>
+                );
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            root.render(
+                <WorkshopsList />
+            );
+        </script>
+    </body>
+</html>
