@@ -848,7 +848,7 @@ const WorkshopsList = () => {
 <h1>List of workshops</h1>
 <hr />
 
-<!-- Add this -->
+{/* Add this */}
 <div className="my-4">
     <button className="btn btn-sm btn-primary me-2" onClick={previous} disabled={loading}>Previous</button>
     <button className="btn btn-sm btn-primary" onClick={next} disabled={loading}>Next</button>
