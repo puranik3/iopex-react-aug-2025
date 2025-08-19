@@ -38,16 +38,34 @@
             const WorkshopsList = () => {
                 const [ workshops, setWorkshops ] = React.useState( [] );
                 const [ loading, setLoading ] = React.useState( true );
+                const [ error, setError ] = React.useState( null );
 
                 // [] dependencies array -> effect function runs once (when component loads)
+
                 React.useEffect(
-                    async () => { // effect
-                        setLoading( true );
+                    // Warning: useEffect must not return anything besides a function, which is used for clean-up.
+                    // async function returns a Promise - effect function cannot be async
+                    // async () => { // effect
+                    () => { // effect
+                        const helper = async () => {
+                            setLoading( true );
 
-                        const workshops = await getWorkshops();
-                        setWorkshops( workshops );
+                            try {
+                                const workshops = await getWorkshops();
+                                setWorkshops( workshops );
+                            } catch( error ) {
+                                setError( error );
+                            }
 
-                        setLoading( false );
+                            setLoading( false );
+                        };
+
+                        helper();
+
+                        // an effect function can return ONLY 1. nothing (undefined), or 2. a cleanup function
+                        // return () => {
+
+                        // };
                     },
                     [] // dependencies array
                 );
@@ -59,21 +77,38 @@
 
                         {
                             loading && (
-                                <div class="d-flex justify-content-center">
-                                    <div class="spinner-border" role="status">
-                                        <span class="visually-hidden">Loading...</span>
+                                <div className="d-flex justify-content-center">
+                                    <div className="spinner-border" role="status">
+                                        <span className="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
                             )
                         }
 
                         {
-                            !loading && (
+                            !loading && error && (
+                                <div className="alert alert-danger" role="alert">
+                                    {error.message}
+                                </div>
+                            )
+                        }
+
+                        {
+                            !loading && !error && (
                                 <div className="row">
                                     {
                                         workshops.map(
                                             workshop => (
-                                                <div className="col col-3">{workshop.name}</div>
+                                                <div className="col col-3 d-flex my-3" key={workshop.id}>
+                                                    <div className="card p-3">
+                                                        <img src={workshop.imageUrl} className="card-img-top" alt={workshop.name} />
+                                                        <div className="card-body">
+                                                            <h5 className="card-title">{workshop.name}</h5>
+                                                            <p className="card-text">{workshop.startDate} - {workshop.endDate}</p>
+                                                            <a href="#" className="btn btn-primary">Know more</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             )
                                         )
                                     }
