@@ -45,7 +45,9 @@
                 state = {
                     workshops: [],
                     loading: true,
-                    error: null
+                    error: null,
+                    page: 1,
+                    lastPage: false
                 };
 
                 // constructor() {
@@ -54,13 +56,49 @@
                 //     };
                 // }
 
+                previous = () => {
+                    const { page } = this.state;
+
+                    if ( page === 1 ) {
+                        return;
+                    }
+
+                    // if the new state depends on the current state, use the function form of the this.setState()
+                    this.setState(state => {
+                        return {
+                            page: state.page - 1
+                        };
+                    });
+                };
+
+                next = () => {
+                    const { page, lastPage } = this.state;
+
+                    if ( lastPage ) {
+                        return;
+                    }
+
+                    this.setState(state => {
+                        return {
+                            page: state.page + 1
+                        };
+                    });
+                };
+
                 render() {
-                    const { workshops, loading, error } = this.state;
+                    const { workshops, loading, error, page } = this.state;
 
                     return (
                         <div className="container my-4">
                             <h1>List of workshops</h1>
                             <hr />
+
+                            {/* Add this */}
+                            <div className="my-4">
+                                <button className="btn btn-sm btn-primary me-2" onClick={this.previous} disabled={loading}>Previous</button>
+                                <button className="btn btn-sm btn-primary" onClick={this.next} disabled={loading}>Next</button>
+                                <div>You are viewing page {page}</div>
+                            </div>
 
                             {
                                 loading && (
@@ -106,15 +144,16 @@
                     );
                 }
 
-                // This method runs AFTER the first render
-                async componentDidMount() {
+                async getWorkshops() {
+                    const { page } = this.state;
+
                     // mention in the object that is passed, whatever is to be updated
                     this.setState({
                         loading: true
                     });
 
                     try {
-                        const workshops = await getWorkshops();
+                        const workshops = await getWorkshops(page);
 
                         this.setState({
                             // workshops: workshops
@@ -127,6 +166,18 @@
                             error,
                             loading: false
                         });
+                    }
+                }
+
+                // This method runs AFTER the first render (called once)
+                async componentDidMount() {
+                    this.getWorkshops();
+                }
+
+                // This method runs AFTER any props / state update (called multiple times)
+                async componentDidUpdate(prevProps, prevState) {
+                    if ( prevState.page !== this.state.page ) {
+                        this.getWorkshops();
                     }
                 }
             }

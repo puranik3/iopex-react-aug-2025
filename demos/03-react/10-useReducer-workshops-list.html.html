@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hello React</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.8/axios.min.js"></script>
+
+        <script type="text/babel">
+            // service
+            const getWorkshops = async ( page = 1 ) => {
+                const response = await axios.get(
+                    `https://workshops-server.onrender.com/workshops`,
+                    {
+                        params: {
+                            _page: page
+                        }
+                    }
+                );
+                return response.data;
+            };
+
+            const FETCHING = 'FETCHING';
+            const FETCHED_WORKSHOPS = 'FETCHED_WORKSHOPS';
+            const ERROR_FETCHING_WORKSHOPS = 'ERROR_FETCHING_WORKSHOPS';
+
+            // reducer is called when an action is dispatched
+            // it is passed the current state and action
+            // it returns the new state
+            const workshopsReducer = ( state, action ) => {
+                console.log( state, action );
+
+                switch ( action.type ) {
+                    case FETCHING:
+                        return {
+                            ...state,
+                            loading: true
+                        };
+                    case FETCHED_WORKSHOPS:
+                        return {
+                            ...state,
+                            loading: false,
+                            workshops: action.payload.workshops
+                        };
+                    case ERROR_FETCHING_WORKSHOPS:
+                        return {
+                            ...state,
+                            loading: false,
+                            error: action.payload.error
+                        };
+                    default:
+                        return state;
+                }
+            };
+
+            const WorkshopsList = () => {
+                const [ page, setPage ] = React.useState( 1 );
+                const [ lastPage, setLastPage ] = React.useState( false );
+
+                const [ state, dispatch ] = React.useReducer(
+                    workshopsReducer,
+                    {
+                        workshops: [],
+                        loading: true,
+                        error: null,
+                    }
+                );
+
+                const { workshops, loading, error } = state;
+
+                // you may have more state variables not related to workshops (you will not store and manipulate the same reducer)
+                // ...other variables
+
+                // how dependencies array works
+                // [] -> effect function runs once (when component loads)
+                // [ page, x ] -> effect function runs once when component loads + when page or x changes
+
+                React.useEffect(
+                    // Warning: useEffect must not return anything besides a function, which is used for clean-up.
+                    // async function returns a Promise - effect function cannot be async
+                    // async () => { // effect
+                    () => { // effect
+                        const helper = async () => {
+                            // setLoading( true );
+                            dispatch({ // dispatch an action
+                                type: FETCHING
+                            });
+
+                            try {
+                                const workshops = await getWorkshops( page );
+
+                                // setWorkshops( workshops );
+                                dispatch({ // dispatch an action
+                                    type: FETCHED_WORKSHOPS,
+                                    payload: {
+                                        // workshops: workshops
+                                        workshops
+                                    }
+                                });
+
+                                if( workshops.length < 10 ) {
+                                    setLastPage( true );
+                                }
+                            } catch( error ) {
+                                // setError( error );
+                                dispatch({
+                                    type: ERROR_FETCHING_WORKSHOPS,
+                                    payload: {
+                                        error
+                                    }
+                                });
+                            }
+
+                            // setLoading( false );
+                        };
+
+                        helper();
+
+                        // an effect function can return ONLY 1. nothing (undefined), or 2. a cleanup function
+                        // return () => {
+
+                        // };
+                    },
+                    [ page ] // dependencies array
+                );
+
+                const previous = () => {
+                    if ( page === 1 ) {
+                        return;
+                    }
+
+                    // if the new state depends on the current state, use the function form of the setter
+                    setPage( p => p - 1 );
+                };
+
+                const next = () => {
+                    if ( lastPage ) {
+                        return;
+                    }
+
+                    setPage( p => p + 1 );
+                };
+
+                return (
+                    <div className="container my-4">
+                        <h1>List of workshops</h1>
+                        <hr />
+
+                        {/* Add this */}
+                        <div className="my-4">
+                            <button className="btn btn-sm btn-primary me-2" onClick={previous} disabled={loading}>Previous</button>
+                            <button className="btn btn-sm btn-primary" onClick={next} disabled={loading}>Next</button>
+                            <div>You are viewing page {page}</div>
+                        </div>
+
+                        {
+                            loading && (
+                                <div className="d-flex justify-content-center">
+                                    <div className="spinner-border" role="status">
+                                        <span className="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {
+                            !loading && error && (
+                                <div className="alert alert-danger" role="alert">
+                                    {error.message}
+                                </div>
+                            )
+                        }
+
+                        {
+                            !loading && !error && (
+                                <div className="row">
+                                    {
+                                        workshops.map(
+                                            workshop => (
+                                                <div className="col col-3 d-flex my-3" key={workshop.id}>
+                                                    <div className="card p-3">
+                                                        <img src={workshop.imageUrl} className="card-img-top" alt={workshop.name} />
+                                                        <div className="card-body">
+                                                            <h5 className="card-title">{workshop.name}</h5>
+                                                            <p className="card-text">{workshop.startDate} - {workshop.endDate}</p>
+                                                            <a href="#" className="btn btn-primary">Know more</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        )
+                                    }
+                                </div>
+                            )
+                        }
+                    </div>
+                );
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            root.render(
+                <WorkshopsList />
+            );
+        </script>
+    </body>
+</html>
