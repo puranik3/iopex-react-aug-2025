@@ -43,15 +43,25 @@
             const FETCHING = 'FETCHING';
             const FETCHED_WORKSHOPS = 'FETCHED_WORKSHOPS';
             const ERROR_FETCHING_WORKSHOPS = 'ERROR_FETCHING_WORKSHOPS';
+            const NEXT_PAGE = 'NEXT_PAGE';
+            const PREVIOUS_PAGE = 'PREVIOUS_PAGE';
 
             // reducer is called when an action is dispatched
             // it is passed the current state and action
             // it returns the new state
+            // RULES FOR REDUCER
+            // ---
+            // It is a "pure function" - does not modify arguments, it does not use global variables / functions (constants are ok) - it uses only the arguments it receives, i.e. local variables, and it should be a predictable function (for given inputs, the output is fixed)
             const workshopsReducer = ( state, action ) => {
-                console.log( state, action );
+                // console.log( state, action );
 
                 switch ( action.type ) {
                     case FETCHING:
+                        // you are changing the state (an argument for the reducer)
+                        // state.loading = true;
+                        // return state;
+
+                        // since reducer should be "pure", we take a copy of the state using spread operator
                         return {
                             ...state,
                             loading: true
@@ -60,7 +70,8 @@
                         return {
                             ...state,
                             loading: false,
-                            workshops: action.payload.workshops
+                            workshops: action.payload.workshops,
+                            lastPage: action.payload.workshops.length < 10 ? true : false
                         };
                     case ERROR_FETCHING_WORKSHOPS:
                         return {
@@ -68,25 +79,34 @@
                             loading: false,
                             error: action.payload.error
                         };
+                    case PREVIOUS_PAGE:
+                        return {
+                            ...state,
+                            page: state.page - 1
+                        };
+                    case NEXT_PAGE:
+                        return {
+                            ...state,
+                            page: state.page + 1
+                        };
                     default:
                         return state;
                 }
             };
 
             const WorkshopsList = () => {
-                const [ page, setPage ] = React.useState( 1 );
-                const [ lastPage, setLastPage ] = React.useState( false );
-
                 const [ state, dispatch ] = React.useReducer(
                     workshopsReducer,
                     {
                         workshops: [],
                         loading: true,
                         error: null,
+                        page: 1,
+                        lastPage: false
                     }
                 );
 
-                const { workshops, loading, error } = state;
+                const { workshops, loading, error, page, lastPage } = state;
 
                 React.useEffect(
                     () => {
@@ -105,10 +125,6 @@
                                         workshops
                                     }
                                 });
-
-                                if( workshops.length < 10 ) {
-                                    setLastPage( true );
-                                }
                             } catch( error ) {
                                 dispatch({
                                     type: ERROR_FETCHING_WORKSHOPS,
@@ -136,8 +152,9 @@
                         return;
                     }
 
-                    // if the new state depends on the current state, use the function form of the setter
-                    setPage( p => p - 1 );
+                    dispatch({
+                        type: PREVIOUS_PAGE
+                    });
                 };
 
                 const next = () => {
@@ -145,7 +162,9 @@
                         return;
                     }
 
-                    setPage( p => p + 1 );
+                    dispatch({
+                        type: NEXT_PAGE
+                    });
                 };
 
                 return (
