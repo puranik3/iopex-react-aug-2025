@@ -88,20 +88,9 @@
 
                 const { workshops, loading, error } = state;
 
-                // you may have more state variables not related to workshops (you will not store and manipulate the same reducer)
-                // ...other variables
-
-                // how dependencies array works
-                // [] -> effect function runs once (when component loads)
-                // [ page, x ] -> effect function runs once when component loads + when page or x changes
-
                 React.useEffect(
-                    // Warning: useEffect must not return anything besides a function, which is used for clean-up.
-                    // async function returns a Promise - effect function cannot be async
-                    // async () => { // effect
-                    () => { // effect
+                    () => {
                         const helper = async () => {
-                            // setLoading( true );
                             dispatch({ // dispatch an action
                                 type: FETCHING
                             });
@@ -109,7 +98,6 @@
                             try {
                                 const workshops = await getWorkshops( page );
 
-                                // setWorkshops( workshops );
                                 dispatch({ // dispatch an action
                                     type: FETCHED_WORKSHOPS,
                                     payload: {
@@ -122,7 +110,6 @@
                                     setLastPage( true );
                                 }
                             } catch( error ) {
-                                // setError( error );
                                 dispatch({
                                     type: ERROR_FETCHING_WORKSHOPS,
                                     payload: {
