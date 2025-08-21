@@ -42,23 +42,29 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
 
         <script type="text/babel">
-            const PanelQuestion = ( { question } ) => {
+            const PanelQuestion = ( { question, toggle } ) => {
                 return (
-                    <div className="panel-question">{question}</div>
-                )
+                    <div className="panel-question" onClick={toggle}>{question}</div>
+                );
             };
 
-            const PanelAnswer = ( { children } ) => {
+            const PanelAnswer = ( { open, children } ) => {
                 return (
-                    <div className="panel-answer">{children}</div>
-                )
+                    open ? <div className="panel-answer">{children}</div> : null
+                );
             };
 
             const Panel = ( { question, children } ) => {
+                const [ open, setOpen ] = React.useState( true );
+
+                const toggle = () => {
+                    setOpen( op => !op );
+                };
+
                 return (
                     <div className="panel">
-                        <PanelQuestion question={question} />
-                        <PanelAnswer>{children}</PanelAnswer>
+                        <PanelQuestion question={question} toggle={toggle} />
+                        <PanelAnswer open={open}>{children}</PanelAnswer>
                     </div>
                 );
             };
