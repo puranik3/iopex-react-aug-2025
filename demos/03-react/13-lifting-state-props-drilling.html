@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hello React</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+        <style>
+            .panel {
+                border: 1px solid #333;
+                border-radius: 4px;
+                margin: 16px;
+            }
+
+            .panel-question,
+            .panel-answer {
+                padding: 1em;
+            }
+
+            .panel-question {
+                background-color: #333;
+                color: ivory;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            const PanelQuestion = ( { question } ) => {
+                return (
+                    <div className="panel-question">{question}</div>
+                )
+            };
+
+            const PanelAnswer = ( { children } ) => {
+                return (
+                    <div className="panel-question">{children}</div>
+                )
+            };
+
+            const Panel = ( { question, children } ) => {
+                return (
+                    <div className="panel">
+                        <PanelQuestion question={question} />
+                        <PanelAnswer>{children}</PanelAnswer>
+                    </div>
+                );
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            root.render(
+                <React.Fragment>
+                    <Panel question="What is React?">
+                        <h2>React - A frontend Library</h2>
+                        <hr />
+                        <p>
+                            React is a library to define and create the UI for frontend apps. It is used usually to build SPAs.
+                        </p>
+                    </Panel>
+                    <Panel question="What is Redux?">
+                        <h2>Redux - A global state management library</h2>
+                        <hr />
+                        <p>
+                            Redux is used to share state across the application. It is a predictable state container for JS apps in general.
+                        </p>
+                    </Panel>
+                </React.Fragment>
+            );
+        </script>
+    </body>
+</html>
