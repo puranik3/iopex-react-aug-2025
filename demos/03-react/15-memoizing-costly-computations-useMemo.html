@@ -1,0 +1,118 @@
+<!-- ! + Enter -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>React.useMemo() for optimizing long-running computations in components</title>
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            const getTodos = () => {
+                const todos = [];
+
+                for (let i = 0; i < 400000; ++i) {
+                    todos.push({
+                        id: i + 1,
+                        task: "Task " + (i + 1),
+                        done: Math.random() < 0.5,
+                    });
+                }
+
+                return todos;
+            };
+
+            const todos = getTodos();
+
+            console.log( todos );
+
+            const App = () => {
+                const [tab, setTab] = React.useState("all");
+                const [theme, setTheme] = React.useState("white");
+
+                return (
+                    <React.Fragment>
+                        <button onClick={() => setTab("all")}>All</button>
+                        <button onClick={() => setTab("done")}>Done</button>
+                        <button onClick={() => setTab("not done")}>Not done</button>
+
+                        <button onClick={() => setTheme(theme === "white" ? "black" : "white")}>
+                            Toggle theme
+                        </button>
+
+                        <TodosFilter todos={todos} tab={tab} theme={theme} />
+                    </React.Fragment>
+                );
+            };
+
+            const filterTodos = (todos, tab) => {
+                switch (tab) {
+                    case "all":
+                        return todos;
+                    case "done":
+                        return todos.filter((item) => item.done);
+                    case "not done":
+                        return todos.filter((item) => !item.done);
+                }
+            };
+
+            const TodosFilter = ({ todos, tab, theme }) => {
+                const filteredTodos = React.useMemo( () => filterTodos(todos, tab), [ todos, tab ] );
+
+                const listEls = React.useMemo(
+                    () => filteredTodos.map(
+                        (todo) => (
+                            <div key={todo.id}>{todo.task}</div>
+                        )
+                    ),
+                    [ filteredTodos ]
+                );
+
+                return (
+                    <div
+                        style={
+                            {
+                                backgroundColor: theme,
+                                color: theme === "white" ? "black" : "white",
+                            }
+                        }
+                    >
+                        {listEls}
+                    </div>
+                );
+            };
+
+            // const TodosFilter = ({ todos, tab, theme }) => {
+            //     const filteredTodos = filterTodos(todos, tab);
+
+            //     return (
+            //         <div
+            //             style={{
+            //                 backgroundColor: theme,
+            //                 color: theme === "white" ? "black" : "white",
+            //             }}
+            //         >
+            //             {
+            //                 filteredTodos.map(
+            //                     (todo) => (
+            //                         <div key={todo.id}>{todo.task}</div>
+            //                     )
+            //                 )
+            //             }
+            //         </div>
+            //     );
+            // };
+
+            const root = ReactDOM.createRoot( document.getElementById( 'root' ) );
+            root.render(
+                <App />
+            );
+        </script>
+    </body>
+</html>
