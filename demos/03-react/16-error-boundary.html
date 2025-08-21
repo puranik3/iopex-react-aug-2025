@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hello React</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <!-- First React -->
+        <!-- also used for mobile apps -->
+        <!-- Architect for the app UI -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.min.js"></script>
+
+        <!-- Second ReactDOM -->
+        <!-- Specific to web apps -->
+        <!-- Builder of the UI (DOM manipulation) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+        <script type="text/babel">
+            class ErrorBoundary extends React.Component {
+                state = {
+                    error: null
+                };
+
+                componentDidCatch( error ) {
+                    this.setState({
+                        // error: error
+                        error
+                    });
+                }
+
+                render() {
+                    const { error } = this.state;
+                    const { children } = this.props;
+
+                    return error ? (
+                        <div>{error.message}</div>
+                    ) : children
+                }
+            }
+
+            const SomeComponent = ({ throwError }) => {
+                if(throwError) {
+                    throw new Error('Some error occured');
+                }
+
+                return <div>I am some component</div>;
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById("root"));
+            root.render(
+                <React.Fragment>
+                    <ErrorBoundary>
+                        {/* Guilty of throwing error */}
+                        <SomeComponent throwError={true} />
+                    </ErrorBoundary>
+
+
+                    <ErrorBoundary>
+                        {/* Poor chap - I did everything correct? Why is this happening to me? */}
+                        <SomeComponent throwError={false} />
+                    </ErrorBoundary>
+                </React.Fragment>
+            );
+        </script>
+    </body>
+</html>
