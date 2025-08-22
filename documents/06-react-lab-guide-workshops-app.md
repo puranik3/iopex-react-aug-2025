@@ -92,6 +92,25 @@ npm start
 ```
 - It is better to open the app (usually running at `http://localhost:3000/`) in Chrome.
 - __Reference__: https://create-react-app.dev/
+- If instead of Create React App (uses Webpack), you would like to use Vite, then follow these steps instead to set up the app.
+```bash
+npm create vite@latest workshops-app -- --template react-swc-ts
+cd workshops-app
+npm install
+npm run dev
+```
+__NOTE__: Use `--template react`, `react-ts`, or `react-swc` if you prefer other variants. `pnpm`/`yarn` work too.
+- Create React App has test libraries (Jest and React Testing Library, i.e. RTL) already installed. You can do so if needed.
+```bash
+npm i -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
+```
+- Build & preview the Vite-based app
+```bash
+npm run build && npm run preview
+```
+
+Grab the full step-by-step with code snippets (aliases, dev proxy, SPA fallback, CRA migration tips, etc.):
+[Guide - React with Vite](./06-vite-react-quickstart.md)
 
 ## Step 2: Understand the project structure and basics of data binding
 - Understand the purpose of each and every file in the project (starting from `package.json`), the organization of application code, the build process (that uses Webpack / Vite), and what happens when the React app launches in the browser.
