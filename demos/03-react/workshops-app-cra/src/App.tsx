@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert } from "react-bootstrap";
+import Menu from './components/common/Menu/Menu';
 
 import './App.scss';
 
@@ -34,6 +35,9 @@ function App() {
                     v16.7 or earlier was significantly different.
                 </p>
             </Alert>
+
+            <Menu />
+
             <h1>{title}</h1>
             <hr />
             <button onClick={changeTitle}>Change title</button>
