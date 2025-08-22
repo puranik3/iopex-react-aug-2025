@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Alert } from "react-bootstrap";
+
 import './App.scss';
 
 function App() {
@@ -16,8 +18,22 @@ function App() {
         setTitle("My first React Application");
     };
 
+    const [show, setShow] = useState(true);
+
     return (
         <>
+            <Alert
+                variant="warning"
+                dismissible
+                onClose={() => setShow(false)}
+            >
+                <Alert.Heading>Note on React Version</Alert.Heading>
+                <p>
+                    The current version of React is v19. This app is built
+                    using React v18. The way an app was built using React
+                    v16.7 or earlier was significantly different.
+                </p>
+            </Alert>
             <h1>{title}</h1>
             <hr />
             <button onClick={changeTitle}>Change title</button>
