@@ -8,6 +8,7 @@ import Menu from './components/common/Menu/Menu';
 import HomePage from './pages/page';
 import WorkshopsListPage from './pages/workshops/page';
 import AddWorkshopPage from './pages/workshops/add/page';
+import NotFoundPage from './pages/not-found';
 
 import './App.scss';
 
@@ -44,6 +45,10 @@ function App() {
                     <Route
                         path="/workshops/add"
                         element={<AddWorkshopPage />}
+                    />
+                    <Route
+                        path="*"
+                        element={<NotFoundPage />}
                     />
                 </Routes>
             </Container>
