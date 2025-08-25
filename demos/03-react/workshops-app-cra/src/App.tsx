@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 
 import { Alert, Container } from "react-bootstrap";
 // import Container from "react-bootstrap/Container"
 
 import Menu from './components/common/Menu/Menu';
-import HomePage from './pages/HomePage/HomePage';
+import HomePage from './pages/page';
+import WorkshopsListPage from './pages/workshops/page';
+import AddWorkshopPage from './pages/workshops/add/page';
 
 import './App.scss';
 
@@ -29,7 +32,20 @@ function App() {
             <Menu />
 
             <Container className="my-4">
-                <HomePage />
+                <Routes>
+                    <Route
+                        path="/"
+                        element={<HomePage />}
+                    />
+                    <Route
+                        path="/workshops"
+                        element={<WorkshopsListPage />}
+                    />
+                    <Route
+                        path="/workshops/add"
+                        element={<AddWorkshopPage />}
+                    />
+                </Routes>
             </Container>
         </>
     );
