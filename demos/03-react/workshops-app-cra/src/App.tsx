@@ -4,7 +4,7 @@ import { Alert, Container } from "react-bootstrap";
 // import Container from "react-bootstrap/Container"
 
 import Menu from './components/common/Menu/Menu';
-import Home from './components/Home/Home';
+import HomePage from './pages/HomePage/HomePage';
 
 import './App.scss';
 
@@ -29,7 +29,7 @@ function App() {
             <Menu />
 
             <Container className="my-4">
-                <Home />
+                <HomePage />
             </Container>
         </>
     );

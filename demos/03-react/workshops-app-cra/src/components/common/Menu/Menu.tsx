@@ -14,11 +14,11 @@ const Menu = () => {
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="/">Home</Nav.Link>
-                        <Nav.Link href="#">List of workshops</Nav.Link>
-                        <Nav.Link href="#">Add a workshop</Nav.Link>
+                        <Nav.Link href="/workshops">List of workshops</Nav.Link>
+                        <Nav.Link href="/workshops/add">Add a workshop</Nav.Link>
                     </Nav>
                     <NavDropdown title="Personalize" id="basic-nav-dropdown">
-                        <NavDropdown.Item href="#">
+                        <NavDropdown.Item href="/workshops/favorites">
                             Favorites
                         </NavDropdown.Item>
                         <NavDropdown.Item href="#">
