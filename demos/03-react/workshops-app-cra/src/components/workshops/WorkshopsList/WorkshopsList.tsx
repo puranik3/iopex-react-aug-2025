@@ -1,5 +1,6 @@
 import { useState, useEffect} from 'react';
 
+import Item from './Item/Item';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 
 import { getWorkshops } from '../../../services/workshops';
@@ -89,14 +90,9 @@ const WorkshopsList = () => {
                             workshops.map(
                                 workshop => (
                                     <div className="col col-3 d-flex my-3" key={workshop.id}>
-                                        <div className="card p-3">
-                                            <img src={workshop.imageUrl} className="card-img-top" alt={workshop.name} />
-                                            <div className="card-body">
-                                                <h5 className="card-title">{workshop.name}</h5>
-                                                <p className="card-text">{workshop.startDate} - {workshop.endDate}</p>
-                                                <a href="/" className="btn btn-primary">Know more</a>
-                                            </div>
-                                        </div>
+                                        <Item
+                                            workshop={workshop}
+                                        />
                                     </div>
                                 )
                             )
