@@ -1,6 +1,10 @@
 import { useState, useEffect} from 'react';
+
+import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
+
 import { getWorkshops } from '../../../services/workshops';
 import IWorkshop from '../../../models/IWorkshop';
+import ErrorAlert from '../../common/ErrorAlert/ErrorAlert';
 
 const WorkshopsList = () => {
     const [ workshops, setWorkshops ] = useState<IWorkshop[]>( [] );
@@ -74,23 +78,9 @@ const WorkshopsList = () => {
                 <div>You are viewing page {page}</div>
             </div>
 
-            {
-                loading && (
-                    <div className="d-flex justify-content-center">
-                        <div className="spinner-border" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                )
-            }
+            {loading && <LoadingSpinner />}
 
-            {
-                !loading && error && (
-                    <div className="alert alert-danger" role="alert">
-                        {error.message}
-                    </div>
-                )
-            }
+            {!loading && error && <ErrorAlert error={error} />}
 
             {
                 !loading && !error && (
