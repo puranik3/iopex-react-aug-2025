@@ -7,12 +7,18 @@ import { getWorkshops } from '../../../services/workshops';
 import IWorkshop from '../../../models/IWorkshop';
 import ErrorAlert from '../../common/ErrorAlert/ErrorAlert';
 
+import { useSearchParams } from "react-router-dom";
+
 const WorkshopsList = () => {
     const [ workshops, setWorkshops ] = useState<IWorkshop[]>( [] );
     const [ loading, setLoading ] = useState( true );
     const [ error, setError ] = useState<Error | null>( null );
-    const [ page, setPage ] = useState( 1 );
+
+    // const [ page, setPage ] = useState( 1 );
     const [ lastPage, setLastPage ] = useState( false );
+
+    const [ searchParams, setSearchParams ] = useSearchParams();
+    const page = +(searchParams.get("page") || "1") // "1" -> 1
 
     // how dependencies array works
     // [] -> effect function runs once (when component loads)
@@ -56,7 +62,10 @@ const WorkshopsList = () => {
         }
 
         // if the new state depends on the current state, use the function form of the setter
-        setPage( p => p - 1 );
+        // setPage( p => p - 1 );
+        setSearchParams({
+            page: '' + ( page - 1 )
+        });
     };
 
     const next = () => {
@@ -64,7 +73,10 @@ const WorkshopsList = () => {
             return;
         }
 
-        setPage( p => p + 1 );
+        // setPage( p => p + 1 );
+        setSearchParams({
+            page: '' + ( page + 1 )
+        });
     };
 
     return (
