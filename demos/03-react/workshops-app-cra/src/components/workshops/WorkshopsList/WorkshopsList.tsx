@@ -11,11 +11,14 @@ import { useSearchParams } from "react-router-dom";
 
 const WorkshopsList = () => {
     const [ workshops, setWorkshops ] = useState<IWorkshop[]>( [] );
+    const [ filteredWorkshops, setFilteredWorkshops ] = useState<IWorkshop[]>( [] );
     const [ loading, setLoading ] = useState( true );
     const [ error, setError ] = useState<Error | null>( null );
 
     // const [ page, setPage ] = useState( 1 );
     const [ lastPage, setLastPage ] = useState( false );
+
+    const [ filterKey, setFilterKey ] = useState( '' );
 
     const [ searchParams, setSearchParams ] = useSearchParams();
     const page = +(searchParams.get("page") || "1") // "1" -> 1
@@ -56,6 +59,15 @@ const WorkshopsList = () => {
         [ page ] // dependencies array
     );
 
+    useEffect(
+        () => {
+            setFilteredWorkshops(
+                workshops.filter( w => w.name.toUpperCase().includes( filterKey.toUpperCase() ) )
+            )
+        },
+        [ workshops, filterKey ]
+    );
+
     const previous = () => {
         if ( page === 1 ) {
             return;
@@ -91,6 +103,20 @@ const WorkshopsList = () => {
                 <div>You are viewing page {page}</div>
             </div>
 
+            <div>
+                <input
+                    type="search"
+                    className="form-control"
+                    placeholder="Type to search by name"
+                    value={filterKey}
+                    onChange={( event ) => setFilterKey( event.target.value )}
+                />
+                <div>
+                    Workshops whose name has
+                    <span className="text-primary"> {filterKey} </span> are shown.
+                </div>
+            </div>
+
             {loading && <LoadingSpinner />}
 
             {!loading && error && <ErrorAlert error={error} />}
@@ -99,7 +125,7 @@ const WorkshopsList = () => {
                 !loading && !error && (
                     <div className="row">
                         {
-                            workshops.map(
+                            filteredWorkshops.map(
                                 workshop => (
                                     <div className="col col-3 d-flex my-3" key={workshop.id}>
                                         <Item
