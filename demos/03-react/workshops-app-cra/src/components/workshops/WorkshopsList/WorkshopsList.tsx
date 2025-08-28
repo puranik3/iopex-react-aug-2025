@@ -110,31 +110,30 @@ const WorkshopsList = () => {
             </div>
 
             <div>
-
-            <div className="btn-group my-3" role="group" aria-label="Filter by category">
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => setSearchParams({ category: '' })}
-                >
-                    All
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-danger"
-                    onClick={() => setSearchParams({
-                        category: 'frontend'
-                    })}
-                >
-                    Frontend
-                </button>
-                <button type="button" className="btn btn-warning" onClick={() => setSearchParams({ category: 'backend' })}>Backend</button>
-                <button type="button" className="btn btn-success" onClick={() => setSearchParams({ category: 'devops' })}>Devops</button>
-                <button type="button" className="btn btn-info" onClick={() => setSearchParams({ category: 'language' })}>Language</button>
-                <button type="button" className="btn btn-light" onClick={() => setSearchParams({ category: 'mobile' })}>Mobile</button>
-                <button type="button" className="btn btn-dark" onClick={() => setSearchParams({ category: 'database' })}>Database</button>
+                <div className="btn-group my-3" role="group" aria-label="Filter by category">
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => setSearchParams({ category: '' })}
+                    >
+                        All
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() => setSearchParams({
+                            category: 'frontend'
+                        })}
+                    >
+                        Frontend
+                    </button>
+                    <button type="button" className="btn btn-warning" onClick={() => setSearchParams({ category: 'backend' })}>Backend</button>
+                    <button type="button" className="btn btn-success" onClick={() => setSearchParams({ category: 'devops' })}>Devops</button>
+                    <button type="button" className="btn btn-info" onClick={() => setSearchParams({ category: 'language' })}>Language</button>
+                    <button type="button" className="btn btn-light" onClick={() => setSearchParams({ category: 'mobile' })}>Mobile</button>
+                    <button type="button" className="btn btn-dark" onClick={() => setSearchParams({ category: 'database' })}>Database</button>
+                </div>
             </div>
-        </div>
 
             <div>
                 <input
