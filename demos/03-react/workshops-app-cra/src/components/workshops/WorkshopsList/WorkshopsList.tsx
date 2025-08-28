@@ -111,6 +111,7 @@ const WorkshopsList = () => {
                     value={filterKey}
                     onChange={( event ) => setFilterKey( event.target.value )}
                 />
+                <button onClick={() => setFilterKey('')}>Reset filter</button>
                 <div>
                     Workshops whose name has
                     <span className="text-primary"> {filterKey} </span> are shown.
