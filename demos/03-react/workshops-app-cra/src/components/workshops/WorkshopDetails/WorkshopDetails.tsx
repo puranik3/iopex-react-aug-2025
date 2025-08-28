@@ -75,7 +75,7 @@ const WorkshopDetails = ( { id } : Props ) => {
                                     {workshop.location.state}
                                 </div>
                             </div>
-                            <div>{workshop.description}</div>
+                            <div dangerouslySetInnerHTML={{ __html: workshop.description }}></div>
                         </Col>
                     </Row>
                 </>

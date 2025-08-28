@@ -32,7 +32,6 @@ const getWorkshopById = async ( id : number ) => {
     return response.data;
 };
 
-
 export {
     getWorkshops,
     getWorkshopById
