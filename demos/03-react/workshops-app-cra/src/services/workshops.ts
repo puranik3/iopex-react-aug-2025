@@ -1,12 +1,24 @@
 import axios from 'axios';
 
-const getWorkshops = async ( page = 1 ) => {
+type Params = {
+    _page: number;
+    category?: string
+};
+
+const getWorkshops = async ( page = 1, category: string = '' ) => {
+    const params: Params = {
+        _page: page,
+    };
+
+    if (category !== '') {
+        params.category = category;
+    }
+
     const response = await axios.get(
         `https://workshops-server.onrender.com/workshops`,
         {
-            params: {
-                _page: page
-            }
+            // params: params
+            params
         }
     );
     return response.data;

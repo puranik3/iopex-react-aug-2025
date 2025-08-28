@@ -10,18 +10,32 @@ import ErrorAlert from '../../common/ErrorAlert/ErrorAlert';
 import { useSearchParams } from "react-router-dom";
 
 const WorkshopsList = () => {
+    // --- Workshops state, workshops filtering and other logic ---
     const [ workshops, setWorkshops ] = useState<IWorkshop[]>( [] );
     const [ filteredWorkshops, setFilteredWorkshops ] = useState<IWorkshop[]>( [] );
     const [ loading, setLoading ] = useState( true );
     const [ error, setError ] = useState<Error | null>( null );
 
+    const [ filterKey, setFilterKey ] = useState( '' );
+
+    useEffect(
+        () => {
+            setFilteredWorkshops(
+                workshops.filter( w => w.name.toUpperCase().includes( filterKey.toUpperCase() ) )
+            )
+        },
+        [ workshops, filterKey ]
+    );
+    // ------------------------------------------------------------
+
+
+    // ---------------- Pagination state and logic ----------------
     // const [ page, setPage ] = useState( 1 );
     const [ lastPage, setLastPage ] = useState( false );
 
-    const [ filterKey, setFilterKey ] = useState( '' );
-
     const [ searchParams, setSearchParams ] = useSearchParams();
     const page = +(searchParams.get("page") || "1") // "1" -> 1
+    const category = searchParams.get("category") || "";
 
     // how dependencies array works
     // [] -> effect function runs once (when component loads)
@@ -36,7 +50,7 @@ const WorkshopsList = () => {
                 setLoading( true );
 
                 try {
-                    const workshops = await getWorkshops( page );
+                    const workshops = await getWorkshops( page, category );
                     setWorkshops( workshops );
 
                     if( workshops.length < 10 ) {
@@ -56,16 +70,7 @@ const WorkshopsList = () => {
 
             // };
         },
-        [ page ] // dependencies array
-    );
-
-    useEffect(
-        () => {
-            setFilteredWorkshops(
-                workshops.filter( w => w.name.toUpperCase().includes( filterKey.toUpperCase() ) )
-            )
-        },
-        [ workshops, filterKey ]
+        [ page, category ] // dependencies array
     );
 
     const previous = () => {
@@ -90,6 +95,7 @@ const WorkshopsList = () => {
             page: '' + ( page + 1 )
         });
     };
+    // ------------------------------------------------------------
 
     return (
         <div className="container my-4">
@@ -104,6 +110,33 @@ const WorkshopsList = () => {
             </div>
 
             <div>
+
+            <div className="btn-group my-3" role="group" aria-label="Filter by category">
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setSearchParams({ category: '' })}
+                >
+                    All
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => setSearchParams({
+                        category: 'frontend'
+                    })}
+                >
+                    Frontend
+                </button>
+                <button type="button" className="btn btn-warning" onClick={() => setSearchParams({ category: 'backend' })}>Backend</button>
+                <button type="button" className="btn btn-success" onClick={() => setSearchParams({ category: 'devops' })}>Devops</button>
+                <button type="button" className="btn btn-info" onClick={() => setSearchParams({ category: 'language' })}>Language</button>
+                <button type="button" className="btn btn-light" onClick={() => setSearchParams({ category: 'mobile' })}>Mobile</button>
+                <button type="button" className="btn btn-dark" onClick={() => setSearchParams({ category: 'database' })}>Database</button>
+            </div>
+        </div>
+
+            <div>
                 <input
                     type="search"
                     className="form-control"
@@ -111,7 +144,9 @@ const WorkshopsList = () => {
                     value={filterKey}
                     onChange={( event ) => setFilterKey( event.target.value )}
                 />
+
                 <button onClick={() => setFilterKey('')}>Reset filter</button>
+
                 <div>
                     Workshops whose name has
                     <span className="text-primary"> {filterKey} </span> are shown.
