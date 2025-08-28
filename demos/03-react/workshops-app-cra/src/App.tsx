@@ -48,7 +48,7 @@ function App() {
                         element={<AddWorkshopPage />}
                     />
                     <Route
-                        path="/workshops/:id"
+                        path="/workshops/:id/*"
                         element={<WorkshopDetailsPage />}
                     />
                     <Route

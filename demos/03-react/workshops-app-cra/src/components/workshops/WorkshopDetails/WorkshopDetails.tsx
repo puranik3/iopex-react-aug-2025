@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { NavLink, Route, Routes } from 'react-router-dom';
 import { Col, Image, Row } from 'react-bootstrap';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faTimesCircle  } from '@fortawesome/free-regular-svg-icons';
@@ -9,6 +10,10 @@ import FormattedDate from '../../common/FormattedDate/FormattedDate';
 
 import IWorkshop from '../../../models/IWorkshop';
 import { getWorkshopById } from '../../../services/workshops';
+import SessionList from './SessionsList/SessionsList';
+import AddSession from './AddSession/AddSession';
+
+import './WorkshopDetails.scss';
 
 interface Props {
     id: number
@@ -99,6 +104,39 @@ const WorkshopDetails = ( { id } : Props ) => {
                     </Row>
                 </>
             )}
+
+            <div>
+                <div className="mt-5">
+                    <NavLink
+                        to={"/workshops/" + id}
+                        className={
+                            ({ isActive }) => "me-2 btn btn-primary btn-sm btn-child-link " + ( isActive ? "btn-active" : "" )
+                        }
+                        end
+                    >
+                        Sessions List
+                    </NavLink>
+                    <NavLink
+                        to={"/workshops/" + id + "/add"}
+                        className={
+                            ({ isActive }) => "btn btn-primary btn-sm btn-child-link " + ( isActive ? "btn-active" : "" )
+                        }
+                    >
+                        Add a session
+                    </NavLink>
+                </div>
+
+                <Routes>
+                    <Route
+                        path=""
+                        element={<SessionList />}
+                    />
+                    <Route
+                        path="add"
+                        element={<AddSession />}
+                    />
+                </Routes>
+            </div>
         </div>
     );
 }

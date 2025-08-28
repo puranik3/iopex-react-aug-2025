@@ -1872,15 +1872,16 @@ import AddSession from './AddSession/AddSession';
     <NavLink
         to={"/workshops/" + id}
         className={
-            ({ isActive }) => "btn btn-primary btn-sm btn-child-link" + ( isActive ? "btn-active" : "" )
+            ({ isActive }) => "me-2 btn btn-primary btn-sm btn-child-link " + ( isActive ? "btn-active" : "" )
         }
+        end
     >
         Sessions List
     </NavLink>
     <NavLink
         to={"/workshops/" + id + "/add"}
         className={
-            ({ isActive }) => "btn btn-primary btn-sm btn-child-link" + ( isActive ? "btn-active" : "" )
+            ({ isActive }) => "btn btn-primary btn-sm btn-child-link " + ( isActive ? "btn-active" : "" )
         }
     >
         Add a session
