@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Col from "react-bootstrap/Col";
 import ListGroup from "react-bootstrap/ListGroup";
 import Row from "react-bootstrap/Row";
 
 import LoadingSpinner from "../../../common/LoadingSpinner/LoadingSpinner";
 import ErrorAlert from "../../../common/ErrorAlert/ErrorAlert";
+import VotingWidget from "../../../common/VotingWidget/VotingWidget";
 
-import { getSessionsForWorkshop } from "../../../../services/sessions";
+import { getSessionsForWorkshop, voteForSession, VoteType } from "../../../../services/sessions";
 import ISession from "../../../../models/ISession";
 
 interface Props {
@@ -39,6 +40,24 @@ const SessionsList = ( { id } : Props ) => {
         [id]
     );
 
+    const vote = useCallback(
+        async (
+            sessionId: number,
+            voteType: VoteType
+        ) => {
+            try {
+                const updatedSession = await voteForSession(sessionId, voteType);
+                setSessions(
+                    sessions => sessions.map( s => s.id === sessionId ? updatedSession : s )
+                );
+                alert('You vote for session ' + updatedSession.name +' has been captured');
+            } catch(error) {
+                alert((error as Error).message);
+            }
+        },
+        [ sessions, voteForSession ]
+    );
+
     return (
         <div>
             <h2>List of Sessions</h2>
@@ -62,8 +81,10 @@ const SessionsList = ( { id } : Props ) => {
                                     xs={1}
                                     className="d-flex flex-column justify-content-center align-items-center"
                                 >
-                                    {/* @todo voting widget */}
-                                    {s.upvoteCount}
+                                    <VotingWidget
+                                        votes={s.upvoteCount}
+                                        vote={(voteType) => vote(s.id, voteType)}
+                                    />
                                 </Col>
                                 <Col xs={11}>
                                     <h3>{ s.name }</h3>
