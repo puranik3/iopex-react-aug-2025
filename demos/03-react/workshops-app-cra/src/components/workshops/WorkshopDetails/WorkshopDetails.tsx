@@ -126,16 +126,18 @@ const WorkshopDetails = ( { id } : Props ) => {
                     </NavLink>
                 </div>
 
-                <Routes>
-                    <Route
-                        path=""
-                        element={<SessionList />}
-                    />
-                    <Route
-                        path="add"
-                        element={<AddSession />}
-                    />
-                </Routes>
+                <div className="my-4">
+                    <Routes>
+                        <Route
+                            path=""
+                            element={<SessionList id={id} />}
+                        />
+                        <Route
+                            path="add"
+                            element={<AddSession />}
+                        />
+                    </Routes>
+                </div>
             </div>
         </div>
     );
