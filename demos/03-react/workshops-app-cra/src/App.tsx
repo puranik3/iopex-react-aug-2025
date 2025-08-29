@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
 import { Alert, Container } from "react-bootstrap";
 // import Container from "react-bootstrap/Container"
@@ -18,6 +19,11 @@ function App() {
 
     return (
         <>
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+            />
+
             <Alert
                 variant="warning"
                 dismissible
