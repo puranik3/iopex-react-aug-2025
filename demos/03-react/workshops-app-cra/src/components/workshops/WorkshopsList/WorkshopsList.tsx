@@ -3,7 +3,7 @@ import { useState, useEffect} from 'react';
 import Item from './Item/Item';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 
-import { getWorkshops } from '../../../services/workshops';
+import { getWorkshops, deleteWorkshopById } from '../../../services/workshops';
 import IWorkshop from '../../../models/IWorkshop';
 import ErrorAlert from '../../common/ErrorAlert/ErrorAlert';
 

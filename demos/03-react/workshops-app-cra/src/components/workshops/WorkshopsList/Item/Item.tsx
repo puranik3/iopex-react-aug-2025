@@ -1,4 +1,6 @@
 import IWorkshop from "../../../../models/IWorkshop";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPencil } from "@fortawesome/free-solid-svg-icons";
 import { Button, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import FormattedDate from "../../../common/FormattedDate/FormattedDate";
@@ -12,6 +14,30 @@ interface Props {
 const Item = ( { workshop } : Props ) => {
     return (
         <Card className="w-100 p-3">
+            <div className="card-action-buttons">
+                <Button
+                    variant="info"
+                    size="sm"
+                    title="Edit this workshop"
+                    className="me-2"
+                    onClick={() => {}}
+                >
+                    <FontAwesomeIcon
+                        icon={faPencil}
+                    />
+                </Button>
+                <Button
+                    variant="danger"
+                    size="sm"
+                    title="Delete this workshop"
+                    onClick={() => {}}
+                >
+                    <FontAwesomeIcon
+                        icon={faTrash}
+                    />
+                </Button>
+            </div>
+
             <div className="card-img-top-wrapper">
                 <Card.Img variant="top" src={workshop.imageUrl} alt={workshop.name} />
             </div>

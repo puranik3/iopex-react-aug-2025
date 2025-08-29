@@ -2308,13 +2308,10 @@ const apiUrl = process.env.REACT_APP_API_URL;
     - __Note__: More details to be added to this step.
 
 ## Step 29: Set up options for editing / deleting a workshop in every workshop list item
-```ts
-export default { getWorkshops, getWorkshopById, deleteWorkshopById };
-```
 - In `src/components/workshops/WorkshopsList/Item/Item.tsx`,
 ```tsx
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faPencil } from "@fortawesome/free-regular-svg-icons";
+import { faTrash, faPencil } from "@fortawesome/free-solid-svg-icons";
 ```
 - Within the `Card` component
 ```tsx
