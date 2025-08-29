@@ -2370,8 +2370,16 @@ import { faTrash, faPencil } from "@fortawesome/free-regular-svg-icons";
 ## Step 30: Deleting a workshop
 - Add a service method to delete a workshop with a given id in `src/services/workshops.ts`. Note that we use void to indicate an empty-bodied response.
 ```ts
-deleteWorkshopById(workshopId: number) {
-    return http.delete<void>(`${apiUrl}/workshops/${workshopId}`);
+const deleteWorkshopById = (workshopId: number) => {
+    return axios.delete<void>(`${apiUrl}/workshops/${workshopId}`);
+};
+
+export {
+    // existing exports
+    // ...
+
+    // add this...
+    deleteWorkshopById
 }
 ```
 - In `src/components/workshops/WorkshopsList/Item/Item.tsx`, set up a callback prop `onDelete` to inform to the parent when user clicks on the delete icon

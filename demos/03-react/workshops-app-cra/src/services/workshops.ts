@@ -6,6 +6,8 @@ type Params = {
     category?: string
 };
 
+const apiUrl = process.env.REACT_APP_API_URL;
+
 const getWorkshops = async ( page = 1, category: string = '' ) => {
     const params: Params = {
         _page: page,
@@ -16,7 +18,7 @@ const getWorkshops = async ( page = 1, category: string = '' ) => {
     }
 
     const response = await axios.get<IWorkshop[]>(
-        `https://workshops-server.onrender.com/workshops`,
+        `${apiUrl}/workshops`,
         {
             // params: params
             params
@@ -27,12 +29,17 @@ const getWorkshops = async ( page = 1, category: string = '' ) => {
 
 const getWorkshopById = async ( id : number ) => {
     const response = await axios.get<IWorkshop>(
-       `https://workshops-server.onrender.com/workshops/${id}`
+       `${apiUrl}/workshops/${id}`
     );
     return response.data;
 };
 
+const deleteWorkshopById = (workshopId: number) => {
+    return axios.delete<void>(`${apiUrl}/workshops/${workshopId}`);
+};
+
 export {
     getWorkshops,
-    getWorkshopById
+    getWorkshopById,
+    deleteWorkshopById
 };
