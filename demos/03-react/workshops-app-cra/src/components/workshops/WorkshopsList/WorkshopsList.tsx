@@ -26,6 +26,24 @@ const WorkshopsList = () => {
         },
         [ workshops, filterKey ]
     );
+
+    const deleteWorkshop = async (workshop: IWorkshop) => {
+        console.log(workshop);
+
+        try {
+            await deleteWorkshopById(workshop.id);
+
+            // @todo Display a success toast with message `Deleted workshop with id = ${workshop.id}` for 5000 ms
+
+            // update this.workshops
+            setWorkshops(
+                w => workshops.filter((w) => w.id !== workshop.id)
+            );
+            // @todo Display a toast
+        } catch( error ) {
+            // @todo Display aa error toast with message ``Could not delete workshop with id = ${workshop.id}` for 5000 ms
+        }
+    };
     // ------------------------------------------------------------
 
 
@@ -165,6 +183,7 @@ const WorkshopsList = () => {
                                     <div className="col col-3 d-flex my-3" key={workshop.id}>
                                         <Item
                                             workshop={workshop}
+                                            onDelete={() => deleteWorkshop(workshop)}
                                         />
                                     </div>
                                 )

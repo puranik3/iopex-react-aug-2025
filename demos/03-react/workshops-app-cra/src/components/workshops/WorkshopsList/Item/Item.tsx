@@ -8,10 +8,11 @@ import FormattedDate from "../../../common/FormattedDate/FormattedDate";
 import './Item.scss';
 
 interface Props {
-    workshop: IWorkshop
+    workshop: IWorkshop,
+    onDelete: () => void
 }
 
-const Item = ( { workshop } : Props ) => {
+const Item = ( { workshop, onDelete } : Props ) => {
     return (
         <Card className="w-100 p-3">
             <div className="card-action-buttons">
@@ -30,7 +31,7 @@ const Item = ( { workshop } : Props ) => {
                     variant="danger"
                     size="sm"
                     title="Delete this workshop"
-                    onClick={() => {}}
+                    onClick={() => onDelete()}
                 >
                     <FontAwesomeIcon
                         icon={faTrash}
