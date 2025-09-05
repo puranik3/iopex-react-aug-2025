@@ -1,21 +1,21 @@
-import { useState, FormEvent } from 'react';
+import { useRef, FormEvent } from 'react';
 import { Button, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 const AddSession = () => {
-    const [ sequenceId, setSequenceId ] = useState('');
-    const [ name, setName ] = useState('');
-    const [ speaker, setSpeaker ] = useState('');
-    const [ duration, setDuration ] = useState('');
-    const [ level, setLevel ] = useState('Basic');
-    const [ abstract, setAbstract ] = useState('');
+    const sequenceIdRef = useRef<HTMLInputElement>(null); // { current: null }
+    const nameRef = useRef<HTMLInputElement>(null);
+    const speakerRef = useRef<HTMLInputElement>(null);
+    const durationRef = useRef<HTMLInputElement>(null);
+    const levelRef = useRef<HTMLSelectElement>(null);
+    const abstractRef = useRef<HTMLTextAreaElement>(null);
 
     const addSession = ( event : FormEvent ) => {
         // we don't want the browser to submit the form
         event.preventDefault();
 
-        console.log( sequenceId );
-        console.log( level );
+        console.log( sequenceIdRef.current?.value );
+        console.log( levelRef.current?.value );
     };
 
     return (
@@ -31,8 +31,7 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="sequenceId">
                     <Form.Label>Sequence ID</Form.Label>
                     <Form.Control
-                        value={sequenceId}
-                        onChange={( event ) => setSequenceId( event.target.value )}
+                        ref={sequenceIdRef}
                         type="number"
                         name="sequenceId"
                         placeholder="The Sequence ID of the session (eg. 1, 2, 3...)"
@@ -41,8 +40,7 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="name">
                     <Form.Label>Name</Form.Label>
                     <Form.Control
-                        value={name}
-                        onChange={( event ) => setName( event.target.value )}
+                        ref={nameRef}
                         type="text"
                         placeholder="Name of the session, Eg. Introduction to Programming"
                     />
@@ -50,8 +48,7 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="speaker">
                     <Form.Label>Speaker</Form.Label>
                     <Form.Control
-                        value={speaker}
-                        onChange={( event ) => setSpeaker( event.target.value )}
+                        ref={speakerRef}
                         type="text"
                         placeholder="Name of the speaker(s). Eg. John Doe, Jane Doe"
                     />
@@ -59,8 +56,7 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="duration">
                     <Form.Label>Duration</Form.Label>
                     <Form.Control
-                        value={duration}
-                        onChange={( event ) => setDuration( event.target.value )}
+                        ref={durationRef}
                         type="text"
                         placeholder="The duration of the session in hours (eg. 2.5)"
                     />
@@ -68,8 +64,7 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="level">
                     <Form.Label>Level</Form.Label>
                     <Form.Select
-                        value={level}
-                        onChange={( event ) => setLevel( event.target.value )}
+                        ref={levelRef}
                         aria-label="Level"
                     >
                         <option disabled>-- Select the level --</option>
@@ -81,8 +76,7 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="abstract">
                     <Form.Label>Abstract</Form.Label>
                     <Form.Control
-                        value={abstract}
-                        onChange={( event ) => setAbstract( event.target.value )}
+                        ref={abstractRef}
                         as="textarea"
                         rows={3}
                     />
