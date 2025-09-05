@@ -1,23 +1,21 @@
 import { useState, FormEvent } from 'react';
 import { Button, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useForm } from 'react-hook-form';
-import { Level } from '../../../../models/ISession';
-
-interface SessionFormType {
-    sequenceId: number;
-    name: string;
-    speaker: string;
-    duration: number;
-    level: Level;
-    abstract: string;
-}
 
 const AddSession = () => {
-    const { register, handleSubmit } = useForm<SessionFormType>();
+    const [ sequenceId, setSequenceId ] = useState('');
+    const [ name, setName ] = useState('');
+    const [ speaker, setSpeaker ] = useState('');
+    const [ duration, setDuration ] = useState('');
+    const [ level, setLevel ] = useState('Basic');
+    const [ abstract, setAbstract ] = useState('');
 
-    const addSession = ( values : SessionFormType ) => {
-        console.log( values );
+    const addSession = ( event : FormEvent ) => {
+        // we don't want the browser to submit the form
+        event.preventDefault();
+
+        console.log( sequenceId );
+        console.log( level );
     };
 
     return (
@@ -29,12 +27,12 @@ const AddSession = () => {
 
             <hr />
 
-            {/* handleSubmit() returns the actual event handler. This handler is called only when form is valid, and it also prevents the browser form submission */}
-            <Form onSubmit={handleSubmit(addSession)}>
+            <Form onSubmit={addSession}>
                 <Form.Group className="mb-4" controlId="sequenceId">
                     <Form.Label>Sequence ID</Form.Label>
                     <Form.Control
-                        {...register('sequenceId', { required: true, pattern: /^\d+$/ })}
+                        value={sequenceId}
+                        onChange={( event ) => setSequenceId( event.target.value )}
                         type="number"
                         name="sequenceId"
                         placeholder="The Sequence ID of the session (eg. 1, 2, 3...)"
@@ -43,7 +41,8 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="name">
                     <Form.Label>Name</Form.Label>
                     <Form.Control
-                        {...register('name', { required: true, pattern: /^[A-Za-z\d][A-Za-z\d .,'&_\/:+#@-]*$/ })}
+                        value={name}
+                        onChange={( event ) => setName( event.target.value )}
                         type="text"
                         placeholder="Name of the session, Eg. Introduction to Programming"
                     />
@@ -51,7 +50,8 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="speaker">
                     <Form.Label>Speaker</Form.Label>
                     <Form.Control
-                         {...register('speaker', { required: true, pattern: /^[A-Za-z][A-Za-z ]*(,\s*[A-Za-z][A-Za-z ]*)*$/ })}
+                        value={speaker}
+                        onChange={( event ) => setSpeaker( event.target.value )}
                         type="text"
                         placeholder="Name of the speaker(s). Eg. John Doe, Jane Doe"
                     />
@@ -59,7 +59,8 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="duration">
                     <Form.Label>Duration</Form.Label>
                     <Form.Control
-                        {...register('duration', { required: true, pattern: /^\d+(\.\d+)?$/ })}
+                        value={duration}
+                        onChange={( event ) => setDuration( event.target.value )}
                         type="text"
                         placeholder="The duration of the session in hours (eg. 2.5)"
                     />
@@ -67,7 +68,8 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="level">
                     <Form.Label>Level</Form.Label>
                     <Form.Select
-                        {...register('level', { required: true })}
+                        value={level}
+                        onChange={( event ) => setLevel( event.target.value )}
                         aria-label="Level"
                     >
                         <option disabled>-- Select the level --</option>
@@ -79,7 +81,8 @@ const AddSession = () => {
                 <Form.Group className="mb-4" controlId="abstract">
                     <Form.Label>Abstract</Form.Label>
                     <Form.Control
-                        {...register('abstract', { required: true, minLength: 20, maxLength: 1024 })}
+                        value={abstract}
+                        onChange={( event ) => setAbstract( event.target.value )}
                         as="textarea"
                         rows={3}
                     />
