@@ -134,7 +134,7 @@ const WorkshopDetails = ( { id } : Props ) => {
                         />
                         <Route
                             path="add"
-                            element={<AddSession />}
+                            element={<AddSession id={id} />}
                         />
                     </Routes>
                 </div>

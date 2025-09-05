@@ -22,4 +22,23 @@ const voteForSession = async (sessionId: number, voteType: VoteType) => {
     return response.data;
 };
 
-export { getSessionsForWorkshop, voteForSession };
+const postSession = async (session: Omit<ISession, 'id'>) => {
+    // we generally pass data in PUT request. In this case we don't have any data.
+    const response = await axios.post<ISession>(
+        `${apiUrl}/sessions`,
+        session,
+        {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+
+    return response.data;
+};
+
+export {
+    getSessionsForWorkshop,
+    voteForSession,
+    postSession
+};
