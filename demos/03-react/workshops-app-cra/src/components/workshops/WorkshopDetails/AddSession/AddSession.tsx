@@ -42,8 +42,8 @@ const AddSession = ( { id } : Props ) => {
             const newSession = await postSession( session );
             toast.success('New session has been added');
 
-            navigate( '..' ); // or navigate('/workshops/${id}')
-            // navigate( `/workshops/${id}` ); // or navigate('/workshops/${id}')
+            // navigate( `/workshops/${id}` );
+            navigate( '..' );
         } catch(error) {
             toast.error((error as Error).message);
         }
