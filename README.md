@@ -73,5 +73,5 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InB1cmFuaWsyQGV4
 ```
 POST https://meetingsapp-isfg.onrender.com/api/calendar?date=2025-09-30
 ```
-- Do add the authorization header
+- Do add the token in the __Authorization__ header
 6. Go ahead and explore the rest of the APIs. You will need to understand what request type, request body and query string parameters to send (if any).
