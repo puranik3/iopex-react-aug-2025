@@ -5,6 +5,8 @@ import { ToastContainer } from 'react-toastify';
 import { Alert, Container } from "react-bootstrap";
 // import Container from "react-bootstrap/Container"
 
+import ThemeContext, { ThemeContextType, Theme } from './contexts/ThemeContext';
+
 import Menu from './components/common/Menu/Menu';
 import HomePage from './pages/page';
 import WorkshopsListPage from './pages/workshops/page';
@@ -16,9 +18,19 @@ import './App.scss';
 
 function App() {
     const [show, setShow] = useState(true);
+    const [ theme, setTheme ] = useState<Theme>( 'light' );
+
+    const value : ThemeContextType = {
+        theme,
+        contrastTheme: theme === 'light' ? 'dark' : 'light',
+        setTheme,
+        toggleTheme() {
+            setTheme( t => t === 'light' ? 'dark' : 'light' )
+        }
+    };
 
     return (
-        <>
+        <ThemeContext.Provider value={value}>
             <ToastContainer
                 position="top-right"
                 autoClose={5000}
@@ -63,7 +75,7 @@ function App() {
                     />
                 </Routes>
             </Container>
-        </>
+        </ThemeContext.Provider>
     );
 }
 

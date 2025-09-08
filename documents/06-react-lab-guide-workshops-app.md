@@ -7,7 +7,7 @@ cd workshops-server
 npm i
 npm start
 ```
-- Completed frontend app can be run from the `workshops-app-completed` folder
+- Completed frontxend app can be run from the `workshops-app-completed` folder
 
 ## Before getting started
 - You will need Node `>= 14` in order to run a React application created using [`create-react-app`](https://create-react-app.dev/). Install a compatible version of Node if you don't have one.

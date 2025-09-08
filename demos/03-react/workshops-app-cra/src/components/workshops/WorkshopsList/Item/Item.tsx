@@ -5,6 +5,8 @@ import { Button, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import FormattedDate from "../../../common/FormattedDate/FormattedDate";
 
+import { useTheme } from '../../../../contexts/ThemeContext';
+
 import './Item.scss';
 
 interface Props {
@@ -13,8 +15,10 @@ interface Props {
 }
 
 const Item = ( { workshop, onDelete } : Props ) => {
+    const { theme, contrastTheme } = useTheme();
+
     return (
-        <Card className="w-100 p-3">
+        <Card className="w-100 p-3" bg={theme} text={contrastTheme}>
             <div className="card-action-buttons">
                 <Button
                     variant="info"
