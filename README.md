@@ -9,7 +9,7 @@
 ## Case study - Meetings App
 
 ### Project Progress Tracker
-Please update this when you start and complete any task - https://docs.google.com/spreadsheets/d/1P9aS7mEUdq48UeLl6IGFR9VurIUXa7F5Rgfv6PN88Bk/edit?usp=sharing
+- Please update this when you start and complete any task - https://docs.google.com/spreadsheets/d/1P9aS7mEUdq48UeLl6IGFR9VurIUXa7F5Rgfv6PN88Bk/edit?usp=sharing
 
 ### Understanding the API
 Download the Postman collection on https://meetingsapp-isfg.onrender.com/ and import it in Postman app.  Use the API documentation to understand the API, and try to use the API.
