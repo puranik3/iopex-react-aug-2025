@@ -6,7 +6,7 @@ import { themeReducer } from './features/themeSlice';
         theme: {
             value: 'light',
             contrastValue: 'dark'
-        };
+        }
     }
  */
 const store = configureStore({

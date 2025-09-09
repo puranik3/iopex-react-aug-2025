@@ -1,0 +1,24 @@
+## Steps to create the Meetings App
+- Understand the backend API from https://meetingsapp-isfg.onrender.com/
+- Set up the app using `create-react-app` / `create vite` etc.
+- Install necessary libraries
+    - Axios
+    - React Router
+    - Bootstrap, React Bootstrap (UI does not matter so much)
+- Set up the folder structure
+    - src
+        - components (set up sub-folders as you wish)
+            - Register
+            - Login
+            - Calendar
+        - models
+            - IUser
+            - IMeeting
+            - IRegister, ILogin, ILoginResponse
+        - pages (Set up folders according to the URL of the page)
+            - registration (/register)
+            - login (/login)
+            - calendar (/calendar)
+        - services
+            - auth.ts (login, register)
+            - meetings (calendar, addMeeting, ...)
