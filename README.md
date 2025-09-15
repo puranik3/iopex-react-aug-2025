@@ -2,6 +2,10 @@
 - React Training for iOpex (Online)
 - Aug 11 - Sep 12 2025 (20 days, 2:00 - 5:00 PM)
 
+
+## Final Demo
+The __final demo__ is scheduled between __9 - 11 AM on Monday Sep 15 2025__. No one has joined so far. I am waiting for the meeting to start. __Hope you have been informed of the meeting.__
+
 ## Exercises
 - Workshops App Lab guide
     - __Aug 26__: Step 17: Creating and using a pagination component, communication from child to parent using a callback prop (function passed as a prop)
