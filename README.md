@@ -4,7 +4,7 @@
 
 
 ## Final Demo
-The __final demo__ is scheduled between __9 - 11 AM on Monday Sep 15 2025__. No one has joined so far. I am waiting for the meeting to start. __Hope you have been informed of the meeting.__
+The __final demo__ is scheduled between __9 - 11 AM on Monday Sep 15 2025__. No one has joined so far. I am waiting for the meeting to start. __Hope you have been informed of the meeting.__ Meetng link for the demo is the usual meeting link.
 
 ## Exercises
 - Workshops App Lab guide
